@@ -8,7 +8,9 @@ excelをDBとして利用できるように、vbaを使ってカスタマイズ
 
 シートの操作クラス : clSheet.cls
 ----------
+  * 名前を指定してSheetの有無をチェック。`existSheet(***) As Boolean'
   * 名前を指定してSheetを作成。同名のシートが存在した場合その中身を削除する。`initSheet(***)`
   * Sheet内のデータ領域をArrayに格納する。`getAllDataAsArray(***) As Boolean`
   * 指定列の最後の行までのデータを取得しArrayに格納。`getColDataAsArray(***) As Boolean`
+  * 指定した文字が、指定列に存在した場合、その行を取得しArrayに格納。`getRowDataVLookUp(***) As Boolean`
     
