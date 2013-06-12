@@ -13,7 +13,7 @@ Array処理クラス : clDatArr.cls
 
 シートの操作クラス : clSheet.cls
 ----------
-  * 名前を指定してSheetの有無をチェック。`existSheet(***) As Boolean'
+  * 名前を指定してSheetの有無をチェック。`existSheet(***) As Boolean`
   * 名前を指定してSheetを作成。同名のシートが存在した場合その中身を削除する。`initSheet(***)`
   * 名前を指定してSheetを作成。同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。`newSheet(***)`
   * Sheet内のデータ領域をArrayに格納する。`getAllDataAsArray(***) As Boolean`
