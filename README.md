@@ -19,3 +19,9 @@ Array処理クラス : clDatArr.cls
   * Sheet内のデータ領域をArrayに格納する。`getAllDataAsArray(***) As Boolean`
   * 指定列の最後の行までのデータを取得しArrayに格納。`getColDataAsArray(***) As Boolean`
   * 指定した文字が、指定列に存在した場合、その行を取得しArrayに格納。`getRowDataVLookUp(***) As Boolean`
+
+シートをまたいだ処理を行うクラス : clSheets.cls
+----------
+  * 複数シートの中のデータを結合して、Arrayに格納。`combineSheets(***) As Boolean`
+
+
