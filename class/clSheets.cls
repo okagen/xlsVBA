@@ -9,10 +9,41 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-
-
-
-
+'==================================================
+'無視するシート名を引数で受けて、Book内の検索対象Sheetの名前Collectionを作成
+'  [i]ignoreSheetNames   無視するシート名が入ったCollection
+'  [o]targetSheets       検索対象のシート名が入ったCollection
+'--------------------------------------------------
+Public Function getTargetSheets(ByVal ignoreSheetNames As Collection, _
+                                ByRef targetSheets As Collection) As Boolean
+                                
+    Dim xlsheet As Worksheet
+    Dim ignoreSheetName As Variant
+    Dim bTgt As Boolean
+    
+    For Each xlsheet In Worksheets
+        
+        bTgt = True
+        
+        For Each ignoreSheetName In ignoreSheetNames
+            '対象ならば、collectionに追加
+            If Left(xlsheet.name, Len(ignoreSheetName)) = ignoreSheetName Then
+                bTgt = False
+            End If
+        Next
+        
+        If bTgt = True Then
+            targetSheets.Add (xlsheet.name)
+        End If
+    Next
+   
+    If targetSheets.Count < 1 Then
+        getTargetSheets = False
+    Else
+        getTargetSheets = True
+    End If
+    
+End Function
 
 '==================================================
 '複数シートの中のデータを結合して、Arrayに格納
@@ -40,7 +71,6 @@ Public Function combineSheets(ByVal shNames As Collection, _
     Dim shName As Variant
     Dim indexRow As Long
     Dim lastRow As Long
-    
     
     indexRow = 1
     For Each shName In shNames

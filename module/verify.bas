@@ -17,6 +17,30 @@ End Enum
 
 '*** clSheetsì‡ÉÅÉ\ÉbÉh ***
 '==================================================
+Sub verify_clSheets_getTargetSheets()
+    Dim shs As New clSheets
+    Dim ignoreNames As New Collection
+    Dim targetNames As New Collection
+    Dim bRet As Boolean
+    Dim name As Variant
+    
+    '=======================
+    'Sheet names to ignore
+    ignoreNames.Add ("tool")
+    ignoreNames.Add ("$")
+    ignoreNames.Add ("ugl-")
+    '=======================
+    
+    'get target sheet names
+    bRet = shs.getTargetSheets(ignoreNames, targetNames)
+    
+    For Each name In targetNames
+        Debug.Print "result ::: done " & name & " |" & Now
+    Next
+    
+End Sub
+
+'==================================================
 Sub verify_clSheets_conbineSheets()
     Dim names As New Collection
     Dim sh As New clSheet
@@ -48,10 +72,10 @@ Sub verify_clSheets_conbineSheets()
         With Sheets("$verify")
             .Select
             .Range(Cells(1, 1), Cells(arrRow, arrCol)) = dat
-            Debug.Print "result ::: done " & Now
+            Debug.Print "result ::: done " & " |" & Now
         End With
     Else
-        Debug.Print "result ::: no data" & Now
+        Debug.Print "result ::: no data" & " |" & Now
     End If
 End Sub
 
