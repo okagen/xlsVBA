@@ -10,45 +10,47 @@ Attribute VB_Exposed = False
 Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
-Enum shCond
 
-    'データの領域はA6からスタート
-    data_start_col = 1
-    data_start_row = 6
-    
-    'データの領域はG（7列）まで
-    data_last_col = 7
 
-End Enum
+
 
 '==================================================
 '指定した文字が、指定列に存在した場合、その行を取得しArrayに格納
+'シートの有無チェックは呼び出し側でやっておく
+'  [i]shName    シート名
+'  [i]datRowS   データ領域のスタート行
+'  [i]datColS   データ領域の最初の列（一番左の列)
+'  [i]datColE   データ領域の最後の列（一番右の列)
+'  [i]col       検索対象列
+'  [i]val       検索文字列
+'  [o]dat       取得したデータ
+'  [o]row       最終行数
 '--------------------------------------------------
 Public Function getRowDataVLookUp(ByVal shName As String, _
+                                    ByVal datRowS As Long, _
+                                    ByVal datColS As Long, _
+                                    ByVal datColE As Long, _
                                     ByVal col As Long, _
                                     ByVal val As String, _
                                     ByRef dat As Variant, _
                                     ByRef row As Long) As Boolean
-    'シートの有無をチェック
-    If Not existSheet(shName) Then
-        getRowDataVLookUp = False
-        Exit Function
-    End If
-    
     Dim lastRow As Long
     Dim rngCol As Range
     Dim rngTmp As Range
     Dim firstAddress As String
-    Dim retTmpBucket(1 To 6000, 1 To shCond.data_last_col - shCond.data_start_col + 1) As Variant
+    Dim retTmpBucket As Variant
+    ReDim retTmpBucket(1 To MAX_ROW, 1 To datColE - datColS + 1)
     Dim retTmp As Variant
     Dim tgtRng As Range
+    Dim datArr As New clDatArr
+    Dim lastIndex As Long
+    Dim bRet As Boolean
     
     With Sheets(shName)
         '最終行取得
         lastRow = .UsedRange.Cells(.UsedRange.Count).row
         '最終行までの1列分のデータを取得
-        Set rngCol = .Range(.Cells(shCond.data_start_row, col), _
-                            .Cells(lastRow, col))
+        Set rngCol = .Range(.Cells(datRowS, col), .Cells(lastRow, col))
         '検索する
         '***.Findは最初のRangeを基点にして次のRangeから検索してしまう。
         '***.Findの検索基点を最後のRangeにする。
@@ -62,13 +64,11 @@ Public Function getRowDataVLookUp(ByVal shName As String, _
             i = 1
             Do
                 '検索で一致した行のデータを取得
-                retTmp = .Range(.Cells(rngTmp.row, shCond.data_start_col), _
-                                .Cells(rngTmp.row, shCond.data_last_col)).Value
+                retTmp = .Range(.Cells(rngTmp.row, datColS), _
+                                .Cells(rngTmp.row, datColE)).Value
                 'retTmpBucketに格納
-                Dim j As Long
-                For j = 1 To shCond.data_last_col - shCond.data_start_col + 1 Step 1
-                    retTmpBucket(i, j) = retTmp(1, j)
-                Next j
+                bRet = datArr.addArray(retTmp, i, retTmpBucket, lastIndex)
+
                 '次を検索
                 Set rngTmp = rngCol.FindNext(rngTmp)
                 i = i + 1
@@ -82,35 +82,31 @@ Public Function getRowDataVLookUp(ByVal shName As String, _
     '返り値配列を作成
     Dim recNum As Long
     Dim ret As Variant
-    Dim cnt1 As Long
-    Dim cnt2 As Long
+    Dim newCol As Long
     recNum = i - 1
-    ReDim ret(1 To recNum, 1 To shCond.data_last_col - shCond.data_start_col + 1) As Variant
-    For cnt1 = 1 To recNum Step 1
-        For cnt2 = 1 To shCond.data_last_col - shCond.data_start_col + 1 Step 1
-            ret(cnt1, cnt2) = retTmpBucket(cnt1, cnt2)
-        Next cnt2
-    Next cnt1
+    newCol = datColE - datColS + 1
+    bRet = datArr.formatArray(retTmpBucket, recNum, newCol, ret)
     dat = ret
     row = recNum
     getRowDataVLookUp = True
-                                    
 End Function
 
 '==================================================
 '指定列の最後の行までのデータを取得しArrayに格納
+'シートの有無チェックは呼び出し側でやっておく
+'  [i]shName            シート名
+'  [i]datRowS           データ領域のスタート行
+'  [i]col               ターゲットの列
+'  [i]allowDuplicate    重複を許すかどうか(true=許す)
+'  [o]dat               取得データ
+'  [o]row               取得データの行数
 '--------------------------------------------------
 Public Function getColDataAsArray(ByVal shName As String, _
+                                    ByVal datRowS As Long, _
                                     ByVal col As Long, _
                                     ByVal allowDuplicate As Boolean, _
                                     ByRef dat As Variant, _
                                     ByRef row As Long) As Boolean
-    'シートの有無をチェック
-    If Not existSheet(shName) Then
-        getColDataAsArray = False
-        Exit Function
-    End If
-    
     '指定列の全データ取得
     Dim lastRow As Long
     Dim ret As Variant
@@ -119,14 +115,15 @@ Public Function getColDataAsArray(ByVal shName As String, _
         '最終行取得
         lastRow = .UsedRange.Cells(.UsedRange.Count).row
         'データ取得
-        ret = .Range(.Cells(shCond.data_start_row, col), _
-                        .Cells(lastRow, col)).Value
+        ret = .Range(.Cells(datRowS, col), .Cells(lastRow, col)).Value
     End With
-    recNum = lastRow - data_start_row + 1
+    recNum = lastRow - datRowS + 1
     
     
     '重複削除処理
-    Dim retTmp(1 To 6000, 1 To 1) As Variant
+    Dim retTmp(1 To MAX_ROW, 1 To 1) As Variant
+    Dim datArr As New clDatArr
+    Dim bRet As Boolean
     If allowDuplicate = False Then
         Dim dic As Variant
         Dim i As Long
@@ -145,14 +142,11 @@ Public Function getColDataAsArray(ByVal shName As String, _
         
         '返り値配列を作成
         recNum = j - 1
-        ReDim ret(1 To recNum, 1 To 1)
-        For i = 1 To recNum Step 1
-            ret(i, 1) = retTmp(i, 1)
-        Next i
+        bRet = datArr.formatArray(retTmp, recNum, 1, ret)
     End If
     
     '返り値設定
-    If lastRow - data_start_row > 0 Then
+    If lastRow - datRowS > 0 Then
         dat = ret
         row = recNum
         getColDataAsArray = True
@@ -163,32 +157,36 @@ End Function
 
 '==================================================
 'Sheet内のデータ領域をArrayに格納する
+'シートの有無チェックは呼び出し側でやっておく
+'  [i]shName    シート名
+'  [i]datRowS   データ領域のスタート行
+'  [i]datColS   データ領域の最初の列（一番左の列)
+'  [i]datColE   データ領域の最後の列（一番右の列)
+'  [o]dat       取得したデータ
+'  [o]row       最終行数
+'  [o]col       列数
 '--------------------------------------------------
 Public Function getAllDataAsArray(ByVal shName As String, _
+                                    ByVal datRowS As Long, _
+                                    ByVal datColS As Long, _
+                                    ByVal datColE As Long, _
                                     ByRef dat As Variant, _
                                     ByRef row As Long, _
                                     ByRef col As Long) As Boolean
-    'シートの有無をチェック
-    If Not existSheet(shName) Then
-        getAllDataAsArray = False
-        Exit Function
-    End If
-                            
     Dim lastRow As Long
     Dim ret As Variant
     With Sheets(shName)
         '最終行取得
         lastRow = .UsedRange.Cells(.UsedRange.Count).row
         'データ取得
-        ret = .Range(.Cells(shCond.data_start_row, shCond.data_start_col), _
-                        .Cells(lastRow, shCond.data_last_col)).Value
+        ret = .Range(.Cells(datRowS, datColS), .Cells(lastRow, datColE)).Value
     End With
     
     '返り値設定
-    If lastRow - data_start_row > 0 Then
+    If lastRow - datRowS > 0 Then
         dat = ret
-        col = shCond.data_last_col - shCond.data_start_col + 1
-        row = lastRow - data_start_row + 1
+        col = datColE - datColS + 1
+        row = lastRow - datRowS + 1
         getAllDataAsArray = True
     Else
         getAllDataAsArray = False
@@ -216,19 +214,48 @@ Public Function initSheet(ByVal shName As String)
 End Function
 
 '==================================================
+'名前を指定してSheetを作成。
+'同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
+'--------------------------------------------------
+Public Function newSheet(ByVal shName As String) As String
+
+    Dim xlsheet As Worksheet
+    Dim num As Integer
+    Dim flg As Boolean
+    Dim newName As String
+    
+    newName = shName
+    num = 1
+    flg = True
+    Do While flg
+        If Not existSheet(newName) Then
+            flg = False
+        Else
+            newName = shName & " " & Format(num, "(#)")
+            num = num + 1
+        End If
+    Loop
+    Worksheets.Add after:=Worksheets(Worksheets.Count)
+    ActiveSheet.name = newName
+    
+    newSheet = newName
+    
+End Function
+
+'==================================================
 '名前を指定してSheetの有無をチェック
 '--------------------------------------------------
 Public Function existSheet(ByVal shName As String) As Boolean
-    Dim xWsheet As Worksheet
+    Dim xlsheet As Worksheet
     On Error Resume Next
-    Set xWsheet = Worksheets(shName)
+    Set xlsheet = Worksheets(shName)
     On Error GoTo 0
-    If xWsheet Is Nothing Then
+    If xlsheet Is Nothing Then
         existSheet = False
     Else
         existSheet = True
     End If
-    Set xWsheet = Nothing
+    Set xlsheet = Nothing
 End Function
 
 

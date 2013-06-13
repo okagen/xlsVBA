@@ -9,19 +9,30 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+
+
+
+
+
 '==================================================
-'複数シートの中身を結合して、Arrayに格納
-'複数シートのデータ部分(Enum shCondで指定している)を結合し、Arrayに格納する。
+'複数シートの中のデータを結合して、Arrayに格納
 '  [i]shNames   検索対象のシート名が入ったCollection
+'  [i]datRowS   データ領域のスタート行
+'  [i]datColS   データ領域の最初の列（一番左の列)
+'  [i]datColE   データ領域の最後の列（一番右の列)
 '  [o]dat       結合したデータ
 '  [o]row       最終行数
 '--------------------------------------------------
 Public Function combineSheets(ByVal shNames As Collection, _
+                                ByVal datRowS As Long, _
+                                ByVal datColS As Long, _
+                                ByVal datColE As Long, _
                                     ByRef dat As Variant, _
                                     ByRef row As Long) As Boolean
     Dim sh As New clSheet
     Dim datArr As New clDatArr
-    Dim retTmpBucket(1 To shCond.data_max_row, 1 To shCond.data_last_col - shCond.data_start_col + 1) As Variant
+    Dim retTmpBucket As Variant
+    ReDim retTmpBucket(1 To MAX_ROW, 1 To datColE - datColS + 1)
     Dim datBySheet As Variant
     Dim rowBySheet As Long
     Dim colBySheet As Long
@@ -30,12 +41,13 @@ Public Function combineSheets(ByVal shNames As Collection, _
     Dim indexRow As Long
     Dim lastRow As Long
     
+    
     indexRow = 1
     For Each shName In shNames
         'シートの有無をチェック
         If sh.existSheet(shName) Then
             'シート内のDataを取得
-            bRet = sh.getAllDataAsArray(shName, datBySheet, rowBySheet, colBySheet)
+            bRet = sh.getAllDataAsArray(shName, datRowS, datColS, datColE, datBySheet, rowBySheet, colBySheet)
             If bRet Then
                 '取得したDataをbucketに追加
                 bRet = datArr.addArray(datBySheet, indexRow, retTmpBucket, lastRow)
