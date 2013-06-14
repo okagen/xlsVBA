@@ -83,6 +83,27 @@ End Sub
 
 '*** clSheetì‡ÉÅÉ\ÉbÉh ***
 '==================================================
+Sub verify_clSheet_setFilter()
+    Dim name As String
+    Dim sh As New clSheet
+    Dim tgtFields As Variant
+    Set tgtFields = CreateObject("Scripting.Dictionary")
+    
+    '=======================
+    'The Sheet name for test
+    name = "sample1"
+    tgtFields.Add 1, "F45N"
+    tgtFields.Add 2, "*Table*"
+    tgtFields.Add 3, "13"
+    '=======================
+    
+    'set filter on the sheet
+    sh.setFilter name, shCond.datRowS, shCond.datColS, shCond.datColE, tgtFields
+    
+End Sub
+
+
+'==================================================
 Sub verify_clSheet_getRowDataVLookUp()
     Dim name As String
     Dim sh As New clSheet

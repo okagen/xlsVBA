@@ -10,9 +10,43 @@ Attribute VB_Exposed = False
 Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
+'==================================================
+'指定した文字が、指定列に存在した場合、その行を取得しArrayに格納
+'シートの有無チェックは呼び出し側でやっておく
+'  [i]shName    シート名
+'  [i]datRowS   データ領域のスタート行
+'  [i]datColS   データ領域の最初の列（一番左の列)
+'  [i]datColE   データ領域の最後の列（一番右の列)
+'  [i]tgtFields Dictionaryオブジェクトで作った{field, Criteria}ハッシュテーブル
+'  ***フィルターは、datRowS-1の行に設定されるためdatRowS>2でないといけない
+'--------------------------------------------------
+Public Function setFilter(ByVal shName As String, _
+                                    ByVal datRowS As Long, _
+                                    ByVal datColS As Long, _
+                                    ByVal datColE As Long, _
+                                    ByVal tgtFields As Variant _
+                                    )
+    Dim lastRow As Long
+    Dim datRng As Range
+    Dim fieldKeyArr As Variant
+    Dim i As Long
+    
+    With Worksheets(shName)
+        '最終行取得
+        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        '最終行までのデータRangeを取得
+        Set datRng = .Range(.Cells(datRowS - 1, datColS), .Cells(lastRow, datColE))
+        'フィルター設定を解除
+        datRng.AutoFilter
+        'ハッシュテーブルのキーの配列を取得
+        fieldKeyArr = tgtFields.keys
+        'フィルター設定
+        For i = 0 To tgtFields.Count - 1
+            datRng.AutoFilter field:=fieldKeyArr(i), Criteria1:=tgtFields(fieldKeyArr(i))
+        Next i
+    End With
 
-
-
+End Function
 
 '==================================================
 '指定した文字が、指定列に存在した場合、その行を取得しArrayに格納
@@ -196,6 +230,7 @@ End Function
 '==================================================
 '名前を指定してSheetを作成。
 '同名のシートが存在した場合その中身を削除する。
+'  [i]shName    作成するシート名
 '--------------------------------------------------
 Public Function initSheet(ByVal shName As String)
     If Not existSheet(shName) Then
@@ -216,6 +251,7 @@ End Function
 '==================================================
 '名前を指定してSheetを作成。
 '同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
+'  [i]shName    作成するシート名
 '--------------------------------------------------
 Public Function newSheet(ByVal shName As String) As String
 
@@ -244,6 +280,7 @@ End Function
 
 '==================================================
 '名前を指定してSheetの有無をチェック
+'  [i]shName    確認するシート名
 '--------------------------------------------------
 Public Function existSheet(ByVal shName As String) As Boolean
     Dim xlsheet As Worksheet

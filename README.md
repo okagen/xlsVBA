@@ -23,7 +23,8 @@ Array処理クラス : clDatArr.cls
 シートをまたいだ処理を行うクラス : clSheets.cls
 ----------
   * 複数シートの中のデータを結合して、Arrayに格納。`combineSheets(***) As Boolean`
-  * 無視するシート名を引数で受けて、Book内の検索対象Sheetの名前Collectionを作成`getTargetSheets(***) As Boolean`
+  * 無視するシート名を引数で受け、検索対象Sheetの名前Collectionを作成。`getTargetSheets(***) As Boolean`
+  * 指定Sheetの指定列にAutoFilterをかける。`setFiltet(***)`
 
 
 
