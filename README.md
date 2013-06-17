@@ -2,9 +2,15 @@
 =========
 excelをDBとして利用できるように、vbaを使ってカスタマイズ
 
+ActiveXコントロール制御用モジュール : ctrls.bas
+----------
+  * ActiveXコントロールのcheckBoxを指定列に複数配置する。その際checkBoxの値と、配置先のセルの値とリンクさせた状態にする。`putChkBoxes(***)`
+
+
 テスト用モジュール : verify.bas
 ----------
 これから作成する関数のテスト用モジュール。例えば`clSheet`クラスの`getAllDataAsArray(***) As Boolean`というメソッドをテストする場合、`verify_clSheet_getAllDataAsArray()`というテスト用の関数を作っています。  
+
 
 Array処理クラス : clDatArr.cls
 ----------
