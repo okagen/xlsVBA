@@ -12,13 +12,15 @@ Option Explicit
 '==================================================
 'ActiveXコントロールのcheckBoxを指定列に指定数配置する。
 'checkBoxの値と、指定列のセルの値とリンクさせた状態。
+'  [i]wb        対象のWorkbook
 '  [i]shName    checkBoxを配置するシート名
 '  [i]rowS      配置する最初の行
 '  [i]colVal    リンクするセルの列
 '  [i]colCtrl   checkBoxを配置する列
 '  [i]count     配置する数
 '--------------------------------------------------
-Public Function putChkBoxesV(ByVal shName As String, _
+Public Function putChkBoxesV(ByVal wb As Workbook, _
+                                ByVal shName As String, _
                                 ByVal rowS As Long, _
                                 ByVal colVal As Long, _
                                 ByVal colCtrl As Long, _
@@ -37,7 +39,7 @@ Public Function putChkBoxesV(ByVal shName As String, _
     '画面更新を一時的にOFF
     Application.ScreenUpdating = False
     
-    With Worksheets(shName)
+    With wb.Worksheets(shName)
         .Select
     
         For i = 1 To count

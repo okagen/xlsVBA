@@ -9,6 +9,38 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+'==================================================
+'ファイル名を受けてworkbookオブジェクトを取得
+'  [i]file  Excelのフルパス
+'  [o]wb    workbookオブジェクト
+'  *** 取得したwbオブジェクトは本関数の外でwb.closeする
+'--------------------------------------------------
+Public Function getWorkbookObj(ByVal file As String, _
+                        ByRef wb As Workbook) As Boolean
+    Dim ret As Workbook
+    Dim wbTmp As Workbook
+    Dim buf As String
+    
+    'ファイルの存在確認
+    buf = Dir(file)
+    If buf = "" Then
+        getWorkbookObj = False
+        Exit Function
+    End If
+    
+    '既に開いていた場合
+    For Each wbTmp In Workbooks
+        If wbTmp.name = buf Then
+            Set wb = wbTmp
+            getWorkbookObj = True
+            Exit Function
+        End If
+    Next wbTmp
+    
+    Set wb = GetObject(file)
+    getWorkbookObj = True
+    
+End Function
 
 '==================================================
 'フルパスのCollectionを受け、ファイル名と保存されているフォルダ名の2次元Arrayを返す

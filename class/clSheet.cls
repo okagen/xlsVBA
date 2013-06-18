@@ -11,8 +11,8 @@ Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
 '==================================================
-'指定した文字が、指定列に存在した場合、その行を取得しArrayに格納
-'シートの有無チェックは呼び出し側でやっておく
+'指定Sheetの指定列にAutoFilterをかける
+'  [i]wb        対象のWorkbook
 '  [i]shName    シート名
 '  [i]datRowS   データ領域のスタート行
 '  [i]datColS   データ領域の最初の列（一番左の列)
@@ -20,20 +20,21 @@ Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination
 '  [i]tgtFields Dictionaryオブジェクトで作った{field, Criteria}ハッシュテーブル
 '  ***フィルターは、datRowS-1の行に設定されるためdatRowS>2でないといけない
 '--------------------------------------------------
-Public Function setFilter(ByVal shName As String, _
-                                    ByVal datRowS As Long, _
-                                    ByVal datColS As Long, _
-                                    ByVal datColE As Long, _
-                                    ByVal tgtFields As Variant _
-                                    )
+Public Function setFilter(ByVal wb As Workbook, _
+                            ByVal shName As String, _
+                            ByVal datRowS As Long, _
+                            ByVal datColS As Long, _
+                            ByVal datColE As Long, _
+                            ByVal tgtFields As Variant _
+                            ) As Boolean
     Dim lastRow As Long
     Dim datRng As Range
     Dim fieldKeyArr As Variant
     Dim i As Long
     
-    With Worksheets(shName)
+    With wb.Worksheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
         '最終行までのデータRangeを取得
         Set datRng = .Range(.Cells(datRowS - 1, datColS), .Cells(lastRow, datColE))
         'フィルター設定を解除
@@ -41,16 +42,18 @@ Public Function setFilter(ByVal shName As String, _
         'ハッシュテーブルのキーの配列を取得
         fieldKeyArr = tgtFields.keys
         'フィルター設定
-        For i = 0 To tgtFields.Count - 1
+        For i = 0 To tgtFields.count - 1
             datRng.AutoFilter field:=fieldKeyArr(i), Criteria1:=tgtFields(fieldKeyArr(i))
         Next i
     End With
-
+    
+    setFilter = True
 End Function
 
 '==================================================
 '指定した文字が、指定列に存在した場合、その行を取得しArrayに格納
 'シートの有無チェックは呼び出し側でやっておく
+'  [i]wb        対象のWorkbook
 '  [i]shName    シート名
 '  [i]datRowS   データ領域のスタート行
 '  [i]datColS   データ領域の最初の列（一番左の列)
@@ -60,7 +63,8 @@ End Function
 '  [o]dat       取得したデータ
 '  [o]row       最終行数
 '--------------------------------------------------
-Public Function getRowDataVLookUp(ByVal shName As String, _
+Public Function getRowDataVLookUp(ByVal wb As Workbook, _
+                                    ByVal shName As String, _
                                     ByVal datRowS As Long, _
                                     ByVal datColS As Long, _
                                     ByVal datColE As Long, _
@@ -80,9 +84,9 @@ Public Function getRowDataVLookUp(ByVal shName As String, _
     Dim lastIndex As Long
     Dim bRet As Boolean
     
-    With Sheets(shName)
+    With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
         '最終行までの1列分のデータを取得
         Set rngCol = .Range(.Cells(datRowS, col), .Cells(lastRow, col))
         '検索する
@@ -128,6 +132,7 @@ End Function
 '==================================================
 '指定列の最後の行までのデータを取得しArrayに格納
 'シートの有無チェックは呼び出し側でやっておく
+'  [i]wb                対象のWorkbook
 '  [i]shName            シート名
 '  [i]datRowS           データ領域のスタート行
 '  [i]col               ターゲットの列
@@ -135,7 +140,8 @@ End Function
 '  [o]dat               取得データ
 '  [o]row               取得データの行数
 '--------------------------------------------------
-Public Function getColDataAsArray(ByVal shName As String, _
+Public Function getColDataAsArray(ByVal wb As Workbook, _
+                                    ByVal shName As String, _
                                     ByVal datRowS As Long, _
                                     ByVal col As Long, _
                                     ByVal allowDuplicate As Boolean, _
@@ -145,9 +151,9 @@ Public Function getColDataAsArray(ByVal shName As String, _
     Dim lastRow As Long
     Dim ret As Variant
     Dim recNum As Long
-    With Sheets(shName)
+    With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
         'データ取得
         ret = .Range(.Cells(datRowS, col), .Cells(lastRow, col)).Value
     End With
@@ -192,6 +198,7 @@ End Function
 '==================================================
 'Sheet内のデータ領域をArrayに格納する
 'シートの有無チェックは呼び出し側でやっておく
+'  [i]wb        対象のWorkbook
 '  [i]shName    シート名
 '  [i]datRowS   データ領域のスタート行
 '  [i]datColS   データ領域の最初の列（一番左の列)
@@ -200,7 +207,8 @@ End Function
 '  [o]row       最終行数
 '  [o]col       列数
 '--------------------------------------------------
-Public Function getAllDataAsArray(ByVal shName As String, _
+Public Function getAllDataAsArray(ByVal wb As Workbook, _
+                                    ByVal shName As String, _
                                     ByVal datRowS As Long, _
                                     ByVal datColS As Long, _
                                     ByVal datColE As Long, _
@@ -209,9 +217,9 @@ Public Function getAllDataAsArray(ByVal shName As String, _
                                     ByRef col As Long) As Boolean
     Dim lastRow As Long
     Dim ret As Variant
-    With Sheets(shName)
+    With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
         'データ取得
         ret = .Range(.Cells(datRowS, datColS), .Cells(lastRow, datColE)).Value
     End With
@@ -230,19 +238,25 @@ End Function
 '==================================================
 '名前を指定してSheetを作成。
 '同名のシートが存在した場合その中身を削除する。
+'  [i]wb        対象のWorkbook
 '  [i]shName    作成するシート名
 '--------------------------------------------------
-Public Function initSheet(ByVal shName As String)
-    If Not existSheet(shName) Then
-        Worksheets.Add after:=Worksheets(Worksheets.Count)
+Public Function initSheet(ByVal wb As Workbook, _
+                            ByVal shName As String) As Boolean
+                            
+    If Not existSheet(wb, shName) Then
+        wb.Worksheets.Add after:=wb.Worksheets(wb.Worksheets.count)
         ActiveSheet.name = shName
     Else
-        With Sheets(shName)
+        With wb.Sheets(shName)
             Dim verLastRow As Long
             Dim delRow As String
-            verLastRow = .UsedRange.Cells(.UsedRange.Count).row + 1
+            verLastRow = .UsedRange.Cells(.UsedRange.count).row + 1
             delRow = "1:" & verLastRow
+            '行削除
             .Range(delRow).Delete
+            'すべてのコントロールを削除
+            .DrawingObjects.Delete
         End With
     End If
 
@@ -251,9 +265,11 @@ End Function
 '==================================================
 '名前を指定してSheetを作成。
 '同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
+'  [i]wb        対象のWorkbook
 '  [i]shName    作成するシート名
 '--------------------------------------------------
-Public Function newSheet(ByVal shName As String) As String
+Public Function newSheet(ByVal wb As Workbook, _
+                            ByVal shName As String) As String
 
     Dim xlsheet As Worksheet
     Dim num As Integer
@@ -264,14 +280,15 @@ Public Function newSheet(ByVal shName As String) As String
     num = 1
     flg = True
     Do While flg
-        If Not existSheet(newName) Then
+        If Not existSheet(wb, newName) Then
             flg = False
         Else
             newName = shName & " " & Format(num, "(#)")
             num = num + 1
         End If
     Loop
-    Worksheets.Add after:=Worksheets(Worksheets.Count)
+    
+    wb.Worksheets.Add after:=wb.Worksheets(Worksheets.count)
     ActiveSheet.name = newName
     
     newSheet = newName
@@ -280,12 +297,14 @@ End Function
 
 '==================================================
 '名前を指定してSheetの有無をチェック
+'  [i]wb        対象のWorkbook
 '  [i]shName    確認するシート名
 '--------------------------------------------------
-Public Function existSheet(ByVal shName As String) As Boolean
+Public Function existSheet(ByVal wb As Workbook, _
+                            ByVal shName As String) As Boolean
     Dim xlsheet As Worksheet
     On Error Resume Next
-    Set xlsheet = Worksheets(shName)
+    Set xlsheet = wb.Worksheets(shName)
     On Error GoTo 0
     If xlsheet Is Nothing Then
         existSheet = False

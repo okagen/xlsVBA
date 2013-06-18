@@ -3,9 +3,15 @@
 excelをDBとして利用できるように、vbaを使ってカスタマイズ
 
 
+サンプルマクロ : sample.bas
+----------
+クラスを使って、サンプルマクロを組んでみます。
+
 テスト用モジュール : verify.bas
 ----------
-これから作成する関数のテスト用モジュール。例えば`clSheet`クラスの`getAllDataAsArray(***) As Boolean`というメソッドをテストする場合、`verify_clSheet_getAllDataAsArray()`というテスト用の関数を作っています。  
+これから作成する関数のテスト用モジュール。例えば`clSheet`クラスの`getAllDataAsArray(***) As Boolean`というメソッドをテストする場合、`verify_clSheet_getAllDataAsArray()`というテスト用の関数を作っています。
+
+***
 
 ActiveXコントロール操作クラス : clAxCtrl.cls
 ----------
@@ -18,8 +24,9 @@ Array処理クラス : clDatArr.cls
 
 ファイル処理クラス : clFiles.cls
 ----------
-  * フルパスのCollectionを受け、ファイル名とフォルダ名の2次元Arrayを返す。`getFolderAndFileNameArr(***) As Boolean`
   * 指定したディレクトリ配下にある全Excelファイルのフルパス取得。`getAllXlsFilePathCol(***) As Boolean`
+  * フルパスのCollectionを受け、ファイル名とフォルダ名の2次元Arrayを返す。`getFolderAndFileNameArr(***) As Boolean`
+  * ファイル名を受けてworkbookオブジェクトを取得。`getWorkbookObj(***) As Boolean`
 
 シートの操作クラス : clSheet.cls
 ----------
