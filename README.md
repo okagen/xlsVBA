@@ -16,6 +16,11 @@ Array処理クラス : clDatArr.cls
   * 2次元配列(arrA)を、2次元配列(dat)に追加して返す。`addArray(***) As Boolean`
   * 2次元配列(arr)を、(newRow, newCol)の2次元配列に整形して返す。`formatArray(***) As Boolean`
 
+ファイル処理クラス : clFiles.cls
+----------
+  * フルパスのCollectionを受け、ファイル名とフォルダ名の2次元Arrayを返す。`getFolderAndFileNameArr(***) As Boolean`
+  * 指定したディレクトリ配下にある全Excelファイルのフルパス取得。`getAllXlsFilePathCol(***) As Boolean`
+
 シートの操作クラス : clSheet.cls
 ----------
   * 名前を指定してSheetの有無をチェック。`existSheet(***) As Boolean`
