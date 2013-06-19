@@ -21,6 +21,7 @@ Array処理クラス : clDatArr.cls
 ----------
   * 2次元配列(arrA)を、2次元配列(dat)に追加して返す。`addArray(***) As Boolean`
   * 2次元配列(arr)を、(newRow, newCol)の2次元配列に整形して返す。`formatArray(***) As Boolean`
+  * 2次元配列(arr)の指定列に、1列挿入し値を埋める。処理後の2次元配列は1列増える。`insertColIntoArray(***) As Boolean`
 
 ファイル処理クラス : clFiles.cls
 ----------

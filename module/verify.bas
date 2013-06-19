@@ -55,6 +55,154 @@ Sub verify_clAxCtrl_putChkBoxesV()
 
 End Sub
 
+'*** clDatArr内メソッド ***
+'==================================================
+Sub verify_clDatArr_insertColIntoArray()
+    Dim datBucket(1 To 10, 1 To 10)
+    Dim row As Long
+    Dim col As Long
+    Dim datArr As New clDatArr
+    Dim sh As New clSheet
+    Dim bRet As Boolean
+    Dim colIndex As Long
+    Dim val As String
+    Dim newDat As Variant
+    Dim retRow As Long
+    Dim retCol As Long
+    Dim wb As Workbook
+
+    '=======================
+    'create Array for test
+    For row = 1 To 10 Step 1
+        For col = 1 To 10 Step 1
+            datBucket(row, col) = "org(" & row & "," & col & ")"
+        Next col
+    Next row
+    
+    colIndex = 3
+    val = "Value col=" & colIndex
+    '=======================
+    
+    bRet = datArr.insertColIntoArray(datBucket, colIndex, val, newDat)
+    If Not bRet Then
+        Exit Sub
+    End If
+    
+    retRow = UBound(newDat, 1)
+    retCol = UBound(newDat, 2)
+    
+    If bRet = True Then
+        Set wb = ThisWorkbook
+        'initialize the sheet to verification
+        bRet = sh.initSheet(wb, "$verify")
+        'plot all data on the $verify sheet
+        With wb.Sheets("$verify")
+            .Select
+            .Range(Cells(1, 1), Cells(retRow, retCol)) = newDat
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+    
+End Sub
+
+'==================================================
+Sub verify_clDatArr_formatArray()
+    Dim datBucket(1 To 100, 1 To 100)
+    Dim datArr As New clDatArr
+    Dim sh As New clSheet
+    Dim row As Long
+    Dim col As Long
+    Dim newRow As Long
+    Dim newCol As Long
+    Dim newDat As Variant
+    Dim retRow As Long
+    Dim retCol As Long
+    Dim wb As Workbook
+    Dim bRet As Boolean
+
+    '=======================
+    'create Array for test
+    For row = 1 To 100 Step 1
+        For col = 1 To 100 Step 1
+            datBucket(row, col) = "data in Bucket(" & row & "," & col & ")"
+        Next col
+    Next row
+    
+    newRow = 10
+    newCol = 12
+    '=======================
+    
+    bRet = datArr.formatArray(datBucket, newRow, newCol, newDat)
+
+    retRow = UBound(newDat, 1)
+    retCol = UBound(newDat, 2)
+    
+    If bRet = True Then
+        Set wb = ThisWorkbook
+        'initialize the sheet to verification
+        bRet = sh.initSheet(wb, "$verify")
+        'plot all data on the $verify sheet
+        With wb.Sheets("$verify")
+            .Select
+            .Range(Cells(1, 1), Cells(retRow, retCol)) = newDat
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+End Sub
+
+'==================================================
+Sub verify_clDatArr_addArray()
+    Dim datA As Variant
+    Dim datB As Variant
+    Dim datBucket As Variant
+    Dim row As Long
+    Dim col As Long
+    Dim datArr As New clDatArr
+    Dim lastIndex As Long
+    Dim wb As Workbook
+    Dim retRow As Long
+    Dim retCol As Long
+    Dim bRet As Boolean
+    Dim sh As New clSheet
+    
+    ReDim datA(1 To 5, 1 To 10)
+    ReDim datB(1 To 5, 1 To 10)
+    ReDim datBucket(1 To 100, 1 To 10)
+    
+    '=======================
+    'create Array for test
+    For row = 1 To 5 Step 1
+        For col = 1 To 10 Step 1
+            datA(row, col) = "data_A(" & row & "," & col & ")"
+            datB(row, col) = "data_B(" & row & "," & col & ")"
+        Next col
+    Next row
+    '=======================
+    
+    bRet = datArr.addArray(datA, 1, datBucket, lastIndex)
+    bRet = datArr.addArray(datB, lastIndex + 1, datBucket, lastIndex)
+    
+    retRow = UBound(datBucket, 1)
+    retCol = UBound(datBucket, 2)
+    
+    If bRet = True Then
+        Set wb = ThisWorkbook
+        'initialize the sheet to verification
+        bRet = sh.initSheet(wb, "$verify")
+        'plot all data on the $verify sheet
+        With wb.Sheets("$verify")
+            .Select
+            .Range(Cells(1, 1), Cells(retRow, retCol)) = datBucket
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+End Sub
 
 
 '*** clFiles内メソッド ***

@@ -10,12 +10,87 @@ Attribute VB_Exposed = False
 Option Explicit
 
 '==================================================
+'2次元配列(arr)の指定列に、1列挿入し値を埋める。処理後の2次元配列は1列増える。
+'  [i]arr           列を追加する配列
+'  [i]newRow  挿入列の添え字
+'  [i]newCol    列の値
+'  [o]dat         追加後の配列
+'--------------------------------------------------
+Public Function insertColIntoArray(ByVal arr As Variant, _
+                                                        ByVal colIndex As Long, _
+                                                        ByVal colVal As String, _
+                                                        ByRef newArr As Variant _
+                                                        ) As Boolean
+    Dim bRet As Boolean
+    Dim dimension As Long
+    Dim retArr As Variant
+    Dim newRow As Long
+    Dim newCol As Long
+
+    '配列の次元数を取得 2次元配列でない場合はエラー
+    bRet = getDimension(arr, dimension)
+    If bRet = False Or dimension <> 2 Then
+        Debug.Print "err ::: dimension ->" & dimension & " [func:insertColIntoArray()]" & Now
+        insertColIntoArray = False
+        Exit Function
+    End If
+    
+     'arrの列数+1よりも挿入列の指定添え字が大きい場合エラー
+    If colIndex > UBound(arr, 2) + 1 Then
+        Debug.Print "err ::: colIndex(" & colIndex & ") is too big [func:insertColIntoArray()] " & Now
+        insertColIntoArray = False
+        Exit Function
+    End If
+     
+    '返り値用の配列を作成
+    ReDim retArr(1 To UBound(arr, 1), 1 To UBound(arr, 2) + 1)
+    
+    '返り値用の配列にデータを設定
+    For newRow = 1 To UBound(arr, 1) Step 1
+        For newCol = 1 To UBound(arr, 2) + 1 Step 1
+            If newCol = colIndex Then
+                retArr(newRow, newCol) = colVal
+            ElseIf newCol > colIndex Then
+                retArr(newRow, newCol) = arr(newRow, newCol - 1)
+            Else
+                retArr(newRow, newCol) = arr(newRow, newCol)
+            End If
+        Next newCol
+    Next newRow
+    
+    newArr = retArr
+    insertColIntoArray = True
+End Function
+
+'==================================================
+'配列(arr)の次元数を求める
+'  [i]arr           列を追加する配列
+'  [o]dimension         追加後の配列
+'--------------------------------------------------
+Private Function getDimension(ByVal arr As Variant, _
+                                                    ByRef retDim As Long _
+                                                    ) As Boolean
+    Dim TempData As Variant
+    Dim i As Long
+
+    On Error Resume Next
+    Do While Err.Number = 0
+        i = i + 1
+        TempData = UBound(arr, i)
+    Loop
+    On Error GoTo 0
+    
+    retDim = i - 1
+    getDimension = True
+End Function
+
+'==================================================
 '2次元配列(arr)を、(newRow, newCol)の2次元配列に整形して返す。
 '値が入らない要素はEmptyになる。
 '  [i]arr       整形する配列
-'  [i]newRow    整形後の行数（レコード数）
-'  [i]newCol    整形後の列（フィールド数）
-'  [o]dat       整形後の配列
+'  [i]colIndex    整形後の行数（レコード数）
+'  [i]colVal    整形後の列（フィールド数）
+'  [o]newArr       整形後の配列
 '--------------------------------------------------
 Public Function formatArray(ByVal arr As Variant, _
                             ByVal newRow As Long, _
