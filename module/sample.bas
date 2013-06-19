@@ -18,7 +18,7 @@ Sub createPartsMaster()
     Dim shs As New clSheets
     Dim sh As New clSheet
     Dim rootPath As String
-    Dim file As Variant
+    Dim fullPath As Variant
     Dim wb As Workbook
     Dim ignoreNames As New Collection
     Dim targetNames As New Collection
@@ -26,12 +26,15 @@ Sub createPartsMaster()
     Dim dat As Variant
     Dim row As Long
     Dim col As Long
-    Dim retTmpBucket(1 To MAX_ROW, _
-                                    1 To confmaster_shCond.datColE - confmaster_shCond.datColS + 1)
     Dim index As Long
     Dim lastIndex As Long
     Dim newDat As Variant
-     
+    Dim folder As String
+    Dim file As String
+    '列数は、データ範囲＋3(フォルダ名、ファイル名、シート名)
+    Dim retTmpBucket(1 To MAX_ROW, _
+                                    1 To confmaster_shCond.datColE - confmaster_shCond.datColS + 4)
+                                    
     '指定フォルダ内のパーツ構成マスターファイルを取得
     rootPath = ThisWorkbook.path & "\sample_config_master"
     bRet = fls.getAllXlsFilePathCol(rootPath, files)
@@ -49,13 +52,19 @@ Sub createPartsMaster()
     'Workbookを開いてデータを取得
     Application.ScreenUpdating = False
     index = 1
-    For Each file In files
+    For Each fullPath In files
         'workbookオブジェクトを取得
-        bRet = fls.getWorkbookObj(file, wb)
+        bRet = fls.getWorkbookObj(fullPath, wb)
         If Not bRet Then
-            Debug.Print "err ::: cannot get->" & file & " |" & Now
             GoTo GONEXT
         End If
+        
+        'フルパスからフォルダ名とファイル名を取得
+        bRet = fls.getFolderAndFileName(fullPath, folder, file)
+        If bRet = False Then
+            GoTo GONEXT
+        End If
+        
         '検索対象のシート名を取得
         Set targetNames = New Collection
         bRet = shs.getTargetSheets(wb, ignoreNames, targetNames)
@@ -65,11 +74,20 @@ Sub createPartsMaster()
         End If
         'シートからデータを取得
         For Each shName In targetNames
+            'データ取得
             bRet = sh.getAllDataAsArray(wb, shName, _
                                                             confmaster_shCond.datRowS, _
                                                             confmaster_shCond.datColS, _
                                                             confmaster_shCond.datColE, _
                                                             dat, row, col)
+            'Emptyだけのレコードを削除
+            bRet = datArr.removeEmptyRecord(dat, dat)
+            '1列目にシート名を挿入
+            bRet = datArr.insertColIntoArray(dat, 1, shName, dat)
+            '1列目にファイル名を挿入
+            bRet = datArr.insertColIntoArray(dat, 1, file, dat)
+            '1列目にフォルダ名を挿入
+            bRet = datArr.insertColIntoArray(dat, 1, folder, dat)
             '取得したデータをbucketに入れる
             bRet = datArr.addArray(dat, index, retTmpBucket, lastIndex)
             index = lastIndex + 1
@@ -77,12 +95,12 @@ Sub createPartsMaster()
         'オブジェクトを閉じる
         wb.Close savechanges:=False
 GONEXT:
-    Next file
+    Next fullPath
     Application.ScreenUpdating = True
     
     'バケツの不要なエリアを削除
     bRet = datArr.formatArray(retTmpBucket, lastIndex, _
-                                                confmaster_shCond.datColE - confmaster_shCond.datColS + 1, _
+                                                UBound(retTmpBucket, 2), _
                                                 newDat)
     If bRet = True Then
         'initialize the sheet to verification
@@ -90,7 +108,7 @@ GONEXT:
         'plot all data on the $verify sheet
         With ThisWorkbook.Sheets("$verify")
             .Select
-            .Range(Cells(1, 1), Cells(lastIndex, confmaster_shCond.datColE - confmaster_shCond.datColS + 1)) = newDat
+            .Range(Cells(1, 1), Cells(lastIndex, UBound(retTmpBucket, 2))) = newDat
             Debug.Print "result ::: done " & " |" & Now
         End With
     Else

@@ -57,6 +57,52 @@ End Sub
 
 '*** clDatArr内メソッド ***
 '==================================================
+Sub verify_clDatArr_removeEmptyRecord()
+    Dim datBucket(1 To 10, 1 To 10)
+    Dim row As Long
+    Dim col As Long
+    Dim sh As New clSheet
+    Dim datArr As New clDatArr
+    Dim bRet As Boolean
+    Dim newDat As Variant
+    Dim retRow As Long
+    Dim retCol As Long
+    Dim wb As Workbook
+
+    '=======================
+    'create Array for test
+    For row = 1 To 10 Step 1
+        For col = 1 To 10 Step 1
+            datBucket(row, col) = "org(" & row & "," & col & ")"
+        Next col
+    Next row
+    '=======================
+    
+    bRet = datArr.removeEmptyRecord(datBucket, newDat)
+    If Not bRet Then
+        Exit Sub
+    End If
+    
+    retRow = UBound(newDat, 1)
+    retCol = UBound(newDat, 2)
+    
+    If bRet = True Then
+        Set wb = ThisWorkbook
+        'initialize the sheet to verification
+        bRet = sh.initSheet(wb, "$verify")
+        'plot all data on the $verify sheet
+        With wb.Sheets("$verify")
+            .Select
+            .Range(Cells(1, 1), Cells(retRow, retCol)) = newDat
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+    
+End Sub
+
+'==================================================
 Sub verify_clDatArr_insertColIntoArray()
     Dim datBucket(1 To 10, 1 To 10)
     Dim row As Long
@@ -267,6 +313,27 @@ Sub verify_clFiles_getFolderAndFileNameArr()
     Else
         Debug.Print "result ::: no data" & " |" & Now
     End If
+End Sub
+
+
+'==================================================
+Sub verify_clFiles_getFolderAndFileName()
+    Dim path As String
+    Dim folder As String
+    Dim file As String
+    Dim fls As New clFiles
+    Dim bRet As Boolean
+    
+    '=======================
+    'The Sheet name for test
+    path = "C:\Users\10007434\Desktop\my prj\excel_vba\sample_config_master\タイヨウ\F-45N ver2.00.xlsx"
+    '=======================
+    
+    'set filter on the sheet
+    bRet = fls.getFolderAndFileName(path, folder, file)
+    
+    Debug.Print "result ::: folder -> "; folder & "   file -> " & file & " |" & Now
+    
 End Sub
 
 '==================================================

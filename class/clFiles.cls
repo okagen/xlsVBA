@@ -49,31 +49,59 @@ End Function
 '--------------------------------------------------
 Public Function getFolderAndFileNameArr(ByVal fullPaths As Collection, _
                                         ByRef dat As Variant) As Boolean
-    Dim FSO As Object
     Dim retTmp As Variant
     Dim fullPath As String
     Dim file As String
     Dim folder As String
     Dim i As Long
+    Dim bRet As Boolean
     
     If fullPaths.count < 1 Then
         getFolderAndFileNameArr = False
         Exit Function
     End If
     
-    Set FSO = CreateObject("Scripting.FileSystemObject")
     ReDim retTmp(1 To fullPaths.count, 1 To 2)
     For i = 1 To fullPaths.count Step 1
         fullPath = fullPaths(i)
-        file = FSO.GetFile(fullPath).name
-        folder = FSO.getFolder(FSO.GetFile(fullPath).ParentFolder).name
-        retTmp(i, 1) = folder
-        retTmp(i, 2) = file
+        bRet = getFolderAndFileName(fullPath, folder, file)
+        If bRet Then
+            retTmp(i, 1) = folder
+            retTmp(i, 2) = file
+        End If
     Next i
-    Set FSO = Nothing
     
     dat = retTmp
     getFolderAndFileNameArr = True
+End Function
+
+'==================================================
+'ファイルのフルパスを受け、ファイル名と保存されているフォルダ名を返す
+'  [i]fullPaths     Excelのフルパスを蓄積したCollection
+'  [o]folder        フォルダ名
+'  [o]file             ファイル名
+'--------------------------------------------------
+Public Function getFolderAndFileName(ByVal fullPath As String, _
+                                                                ByRef folder As String, _
+                                                                ByRef file As String _
+                                                                ) As Boolean
+    Dim FSO As Object
+    Dim bRet As Boolean
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    
+    'ファイルがない場合エラー
+    bRet = FSO.FileExists(fullPath)
+    If Not bRet Then
+        Debug.Print "err ::: file does not exist.(" & fullPath & ")  [func:insertColIntoArray()]" & Now
+        getFolderAndFileName = False
+        Exit Function
+    End If
+    
+    file = FSO.GetFile(fullPath).name
+    folder = FSO.getFolder(FSO.GetFile(fullPath).ParentFolder).name
+    
+    Set FSO = Nothing
+    getFolderAndFileName = True
 End Function
 
 '==================================================

@@ -8,13 +8,76 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+'==================================================
+'2次元配列で、あるレコード(行)のすべての要素(列)がEmptlyの場合、削除する
+'  [i]arr           対象の配列
+'  [o]newArr         Emptyレコード削除後の配列
+'--------------------------------------------------
+Public Function removeEmptyRecord(ByVal arr As Variant, _
+                                                            ByRef newArr As Variant _
+                                                            ) As Boolean
+    Dim bRet As Boolean
+    Dim dimension As Long
+    Dim tmpArr As Variant
+    Dim orgRow As Long
+    Dim orgCol As Long
+    Dim emptyFlg As Boolean
+    Dim i As Long
+    Dim j As Long
+    Dim tmpRow As Long
+    
+    '配列の次元数を取得 2次元配列でない場合はエラー
+    bRet = getDimension(arr, dimension)
+    If bRet = False Or dimension <> 2 Then
+        Debug.Print "err ::: dimension ->" & dimension & " [func:removeEmptyRecord()]" & Now
+        removeEmptyRecord = False
+        Exit Function
+    End If
+    
+    '返り値用の配列の領域を生成
+    orgRow = UBound(arr, 1)
+    orgCol = UBound(arr, 2)
+    ReDim tmpArr(1 To orgRow, 1 To orgCol)
+    
+    '返り値用の配列にデータを設定
+    tmpRow = 1
+    For i = 1 To orgRow Step 1
+        '各要素に値が設定されているかをチェック
+        emptyFlg = True
+        For j = 1 To orgCol Step 1
+            If Not IsEmpty(arr(i, j)) Then
+                emptyFlg = False
+            End If
+        Next j
+        
+        '値が一つでも入っていた場合は返り値用の配列にコピー
+        If Not emptyFlg Then
+            For j = 1 To orgCol Step 1
+                tmpArr(tmpRow, j) = arr(i, j)
+            Next j
+            tmpRow = tmpRow + 1
+        End If
+    Next i
+    
+    '不要なレコードを削除
+    bRet = formatArray(tmpArr, tmpRow - 1, orgCol, tmpArr)
+    If bRet = False Then
+        Debug.Print "err ::: cannot format the array. [func:removeEmptyRecord()]" & Now
+        removeEmptyRecord = False
+        Exit Function
+    End If
+    
+    newArr = tmpArr
+    removeEmptyRecord = True
+End Function
+
 
 '==================================================
 '2次元配列(arr)の指定列に、1列挿入し値を埋める。処理後の2次元配列は1列増える。
 '  [i]arr           列を追加する配列
 '  [i]newRow  挿入列の添え字
 '  [i]newCol    列の値
-'  [o]dat         追加後の配列
+'  [o]newArr   追加後の配列
 '--------------------------------------------------
 Public Function insertColIntoArray(ByVal arr As Variant, _
                                                         ByVal colIndex As Long, _
@@ -125,9 +188,7 @@ Public Function formatArray(ByVal arr As Variant, _
 
     dat = retTmpBucket
     formatArray = True
-                            
 End Function
-
 
 '==================================================
 '2次元配列(arr)を、2次元配列(dat)に追加して返す

@@ -22,11 +22,13 @@ Array処理クラス : clDatArr.cls
   * 2次元配列(arrA)を、2次元配列(dat)に追加して返す。`addArray(***) As Boolean`
   * 2次元配列(arr)を、(newRow, newCol)の2次元配列に整形して返す。`formatArray(***) As Boolean`
   * 2次元配列(arr)の指定列に、1列挿入し値を埋める。処理後の2次元配列は1列増える。`insertColIntoArray(***) As Boolean`
+  * 2次元配列で、あるレコード(行)のすべての要素(列)がEmptlyの場合、削除する。`removeEmptyRecord(***) As Boolean`
 
 ファイル処理クラス : clFiles.cls
 ----------
   * 指定したディレクトリ配下にある全Excelファイルのフルパス取得。`getAllXlsFilePathCol(***) As Boolean`
   * フルパスのCollectionを受け、ファイル名とフォルダ名の2次元Arrayを返す。`getFolderAndFileNameArr(***) As Boolean`
+  * ファイルのフルパスを受け、ファイル名と保存されているフォルダ名を返す。`getFolderAndFileName(***) As Boolean`
   * ファイル名を受けてworkbookオブジェクトを取得。`getWorkbookObj(***) As Boolean`
 
 シートの操作クラス : clSheet.cls
