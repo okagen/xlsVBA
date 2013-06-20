@@ -3,9 +3,14 @@
 excelをDBとして利用できるように、vbaを使ってカスタマイズ
 
 
-サンプルマクロ : sample.bas
+サンプルクラス : sampletool.cls
 ----------
-クラスを使って、サンプルマクロを組んでみます。
+Excelのシート状にコントロールを配置して、それらから共通モジュールを呼び出す形でサンプルを作っています。
+
+サンプルモジュール : sample.bas
+----------
+クラスを使って、サンプルマクロを組んでみます。出来は荒いですが、ちゃんと作るときにちゃんとします。  
+  * パーツマスターシートを生成。`createPartsMasterSheet`
 
 テスト用モジュール : verify.bas
 ----------
@@ -23,6 +28,7 @@ Array処理クラス : clDatArr.cls
   * 2次元配列(arr)を、(newRow, newCol)の2次元配列に整形して返す。`formatArray(***) As Boolean`
   * 2次元配列(arr)の指定列に、1列挿入し値を埋める。処理後の2次元配列は1列増える。`insertColIntoArray(***) As Boolean`
   * 2次元配列で、あるレコード(行)のすべての要素(列)がEmptlyの場合、削除する。`removeEmptyRecord(***) As Boolean`
+  * 2次元配列の中に、同じレコード(行)が存在した場合、一つを残して他のレコードを削除する処理を追加する。`removeDuplication(***) As Boolean`
 
 ファイル処理クラス : clFiles.cls
 ----------

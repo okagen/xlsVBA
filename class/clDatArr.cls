@@ -8,6 +8,82 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+
+'==================================================
+'2次元配列の中に、同じレコード(行)が存在した場合、一つを残して他のレコードを削除する処理を追加する。
+'  [i]arr           対象の配列
+'  [o]newArr    行の重複削除後の配列
+'  [i]ignoreCol レコードの重複をチェックす際に無視する要素(列)の添え字
+'--------------------------------------------------
+Public Function removeDuplication(ByVal arr As Variant, _
+                                                    ByRef newArr As Variant, _
+                                                    Optional ByVal ignoreCol As Long = 0 _
+                                                    ) As Boolean
+    Dim bRet As Boolean
+    Dim dimension As Long
+    Dim orgRow As Long
+    Dim orgCol As Long
+    Dim tmpArr As Variant
+    Dim dic As Variant
+    Dim i As Long
+    Dim j As Long
+    Dim tmpRow As Long
+    Dim word As String
+    Dim oneLine As String
+                                                    
+    '配列の次元数を取得 2次元配列でない場合はエラー
+    bRet = getDimension(arr, dimension)
+    If bRet = False Or dimension <> 2 Then
+        Debug.Print "err ::: dimension ->" & dimension & " [func:removeDuplication()]" & Now
+        removeDuplication = False
+        Exit Function
+    End If
+    
+    '返り値用の配列の領域を生成
+    orgRow = UBound(arr, 1)
+    orgCol = UBound(arr, 2)
+    ReDim tmpArr(1 To orgRow, 1 To orgCol)
+    
+    '重複するレコードを無視して、新しいArrayを作成する
+    Set dic = CreateObject("Scripting.Dictionary")
+    tmpRow = 1
+    For i = 1 To orgRow Step 1
+        'Empty地は" "に変換し、レコードを１文字列に変換。要素は"-"でつなぐ
+        oneLine = ""
+        For j = 1 To orgCol Step 1
+            'ignoreColと一致した場合は無視する
+            If ignoreCol <> j Then
+                If IsEmpty(arr(i, j)) Then
+                    word = " "
+                Else
+                    word = arr(i, j)
+                End If
+                oneLine = oneLine & "-" & word
+            End If
+        Next j
+        
+        'Dictionaryオブジェクトを使う。同じ値がなければ返り値用Arrayに追加
+        If Not dic.Exists(oneLine) Then
+            dic.Add oneLine, oneLine
+            For j = 1 To orgCol Step 1
+                tmpArr(tmpRow, j) = arr(i, j)
+            Next j
+            tmpRow = tmpRow + 1
+        End If
+    Next i
+    
+    '不要なレコードを削除
+    bRet = formatArray(tmpArr, tmpRow - 1, orgCol, tmpArr)
+    If bRet = False Then
+        Debug.Print "err ::: cannot format the array. [func:removeEmptyRecord()]" & Now
+        removeDuplication = False
+        Exit Function
+    End If
+    
+    newArr = tmpArr
+    removeDuplication = True
+End Function
+
 '==================================================
 '2次元配列で、あるレコード(行)のすべての要素(列)がEmptlyの場合、削除する
 '  [i]arr           対象の配列
