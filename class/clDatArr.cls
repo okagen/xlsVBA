@@ -9,6 +9,74 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+
+'==================================================
+'Collectionの中身を2次元配列に入れなおす。
+'  [i]coll    Collection
+'  [i]isRow 行用か列用 true=行(1,1)(1,2)・・・
+'                               false=列(1,1)(2,1)・・・
+'  [o]arr    変換後の配列
+'--------------------------------------------------
+Public Function cnvCollToArr(ByVal coll As Collection, _
+                                            ByVal isRow As Boolean, _
+                                            ByRef arr As Variant _
+                                            ) As Boolean
+    Dim retArr As Variant
+    Dim i As Long
+    
+    If isRow = True Then
+        ReDim retArr(1 To 1, 1 To coll.count)
+        For i = 1 To coll.count Step 1
+            retArr(1, i) = coll(i)
+        Next i
+    Else
+        ReDim retArr(1 To coll.count, 1 To 1)
+        For i = 1 To coll.count Step 1
+            retArr(i, 1) = coll(i)
+        Next i
+    End If
+    
+    arr = retArr
+    cnvCollToArr = True
+End Function
+
+'==================================================
+'2次元配列を1行ずつCollectionに入れなおす。
+'  [i]arr      対象の配列
+'  [o]coll    変換後のCollection
+'--------------------------------------------------
+Public Function cnvArrToColl(ByVal arr As Variant, _
+                                            ByRef coll As Collection _
+                                            ) As Boolean
+    Dim bRet As Boolean
+    Dim dimension As Long
+    Dim orgRow As Long
+    Dim orgCol As Long
+    Dim retColl As New Collection
+    Dim i As Long
+    Dim j As Long
+    
+    '配列の次元数を取得 2次元配列でない場合はエラー
+    bRet = getDimension(arr, dimension)
+    If bRet = False Or dimension <> 2 Then
+        Debug.Print "err ::: dimension ->" & dimension & " [func:cnvArrToColl()]" & Now
+        cnvArrToColl = False
+        Exit Function
+    End If
+    
+    orgRow = UBound(arr, 1)
+    orgCol = UBound(arr, 2)
+    
+    For i = 1 To orgRow Step 1
+        For j = 1 To orgCol Step 1
+            retColl.Add (arr(i, j))
+        Next j
+    Next i
+    
+    Set coll = retColl
+    cnvArrToColl = True
+End Function
+
 '==================================================
 '2次元配列の中に、同じレコード(行)が存在した場合、一つを残して他のレコードを削除する処理を追加する。
 '  [i]arr           対象の配列
@@ -147,12 +215,66 @@ Public Function removeEmptyRecord(ByVal arr As Variant, _
     removeEmptyRecord = True
 End Function
 
+'==================================================
+'2次元配列(arr)の指定列を削除。処理後の2次元配列は1列減る。
+'  [i]arr           削除元配列
+'  [i]colIndex  挿入列の添え字
+'  [o]newArr   削除後の配列
+'--------------------------------------------------
+Public Function removeColFromArray(ByVal arr As Variant, _
+                                                        ByVal colIndex As Long, _
+                                                        ByRef newArr As Variant _
+                                                        ) As Boolean
+    Dim bRet As Boolean
+    Dim dimension As Long
+    Dim retArr As Variant
+    Dim i As Long
+    Dim j As Long
+
+     '配列の次元数を取得 2次元配列でない場合はエラー
+    bRet = getDimension(arr, dimension)
+    If bRet = False Or dimension <> 2 Then
+        Debug.Print "err ::: dimension ->" & dimension & " [func:removeColFromArray()]" & Now
+        removeColFromArray = False
+        Exit Function
+    End If
+    
+    'arrの列数よりも削除列の指定添え字が大きい場合エラー
+    If colIndex > UBound(arr, 2) Then
+        Debug.Print "err ::: colIndex(" & colIndex & ") is too big [func:removeColFromArray()] " & Now
+        removeColFromArray = False
+        Exit Function
+    ElseIf colIndex < 1 Then
+        Debug.Print "err ::: colIndex(" & colIndex & ") is not avairable [func:removeColFromArray()] " & Now
+        removeColFromArray = False
+        Exit Function
+    End If
+     
+    '返り値用の配列を作成
+    ReDim retArr(1 To UBound(arr, 1), 1 To UBound(arr, 2) - 1)
+    
+    '返り値用の配列にデータを設定
+    For i = 1 To UBound(arr, 1) Step 1
+        For j = 1 To UBound(arr, 2) Step 1
+            If j = colIndex Then
+                'なにもしない
+            ElseIf j < colIndex Then
+                retArr(i, j) = arr(i, j)
+            ElseIf j > colIndex Then
+                retArr(i, j - 1) = arr(i, j)
+            End If
+        Next j
+    Next i
+    
+    newArr = retArr
+    removeColFromArray = True
+End Function
 
 '==================================================
 '2次元配列(arr)の指定列に、1列挿入し値を埋める。処理後の2次元配列は1列増える。
 '  [i]arr           列を追加する配列
-'  [i]newRow  挿入列の添え字
-'  [i]newCol    列の値
+'  [i]colIndex  挿入列の添え字
+'  [i]colVal    列の値
 '  [o]newArr   追加後の配列
 '--------------------------------------------------
 Public Function insertColIntoArray(ByVal arr As Variant, _
@@ -278,22 +400,24 @@ Public Function addArray(ByVal arr As Variant, _
                             ByVal indexRow As Long, _
                             ByRef dat As Variant, _
                             ByRef row As Long) As Boolean
-    '項目数（列数）が同じかチェック
-    Dim col As Long
-    col = UBound(dat, 2)
-    If col <> UBound(arr, 2) Then
-        Debug.Print "err ::: no much columns. [func:combineArray()]" & Now
+    Dim rowArr As Long
+    Dim colArr As Long
+    Dim rowDat As Long
+    Dim colDat As Long
+    
+    rowArr = UBound(arr, 1)
+    colArr = UBound(arr, 2)
+    rowDat = UBound(dat, 1)
+    colDat = UBound(dat, 2)
+    
+    'datにarrを入れてもオーバーフローしないかチェック
+    If rowDat < rowArr + indexRow - 1 Then
+        Debug.Print "err ::: not enough ROW size. [func:combineArray()]" & Now
         addArray = False
         Exit Function
     End If
-    
-    'datにarrを入れてもオーバーフローしないかチェック
-    Dim rowDat As Long
-    Dim rowA As Long
-    rowDat = UBound(dat, 1)
-    rowA = UBound(arr, 1)
-    If rowDat < rowA + indexRow - 1 Then
-        Debug.Print "err ::: not enough size. [func:combineArray()]" & Now
+    If colDat < colArr Then
+        Debug.Print "err ::: not enough COLUMN size. [func:combineArray()]" & Now
         addArray = False
         Exit Function
     End If
@@ -301,12 +425,12 @@ Public Function addArray(ByVal arr As Variant, _
     'arrの中身をdatに入れる
     Dim i As Long
     Dim j As Long
-    For i = 1 To rowA Step 1
-        For j = 1 To col
+    For i = 1 To rowArr Step 1
+        For j = 1 To colArr
             dat(indexRow + i - 1, j) = arr(i, j)
         Next j
     Next i
-    row = indexRow + rowA - 1
+    row = indexRow + rowArr - 1
     addArray = True
 End Function
 

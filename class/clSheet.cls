@@ -201,6 +201,7 @@ End Function
 '  [i]wb        対象のWorkbook
 '  [i]shName    シート名
 '  [i]datRowS   データ領域のスタート行
+'  [i]datRowE   データ領域の最終行「0」の場合シートの最後の行まで検索する。
 '  [i]datColS   データ領域の最初の列（一番左の列)
 '  [i]datColE   データ領域の最後の列（一番右の列)
 '  [o]dat       取得したデータ
@@ -210,6 +211,7 @@ End Function
 Public Function getAllDataAsArray(ByVal wb As Workbook, _
                                     ByVal shName As String, _
                                     ByVal datRowS As Long, _
+                                    ByVal datRowE As Long, _
                                     ByVal datColS As Long, _
                                     ByVal datColE As Long, _
                                     ByRef dat As Variant, _
@@ -219,13 +221,17 @@ Public Function getAllDataAsArray(ByVal wb As Workbook, _
     Dim ret As Variant
     With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.count).row
+        If datRowE = 0 Then
+            lastRow = .UsedRange.Cells(.UsedRange.count).row
+        Else
+            lastRow = datRowE
+        End If
         'データ取得
         ret = .Range(.Cells(datRowS, datColS), .Cells(lastRow, datColE)).Value
     End With
     
     '返り値設定
-    If lastRow - datRowS > 0 Then
+    If lastRow - datRowS >= 0 Then
         dat = ret
         col = datColE - datColS + 1
         row = lastRow - datRowS + 1
@@ -314,5 +320,39 @@ Public Function existSheet(ByVal wb As Workbook, _
     Set xlsheet = Nothing
 End Function
 
-
-
+'==================================================
+'指定したRange範囲内にある図形を削除する
+'  [i]wb            対象のWorkbook
+'  [i]shName    対象のシート名
+'  [i]rowUL       削除対象範囲 左上行番号
+'  [i]colUL        削除対象範囲 左上列番号
+'  [i]rowLR       削除対象範囲 右下行番号
+'  [i]colLR        削除対象範囲 右下列番号
+'--------------------------------------------------
+Public Function deleteObjectInRange(ByVal wb As Workbook, _
+                                                        ByVal shName As String, _
+                                                        ByVal rowUL As Long, _
+                                                        ByVal colUL As Long, _
+                                                        ByVal rowLR As Long, _
+                                                        ByVal colLR As Long _
+                                                        ) As Boolean
+    Dim shp As Shape
+    Dim rng_shp As Range
+    Dim rng As Range
+ 
+    'Rangeをセレクト
+    Set rng = Range(Cells(rowUL, colUL), Cells(rowLR, colLR))
+ 
+    'すべての図形にループ処理
+    For Each shp In wb.Worksheets(shName).Shapes
+        '図形の配置されているセル範囲をオブジェクト変数にセット
+        Set rng_shp = Range(shp.TopLeftCell, shp.BottomRightCell)
+ 
+        '図形の配置されているセル範囲と選択されているセル範囲が重なっていれば図形を削除
+        If Not Intersect(rng_shp, rng) Is Nothing Then
+            shp.Delete
+        End If
+    Next
+    Set rng = Nothing
+    deleteObjectInRange = True
+End Function

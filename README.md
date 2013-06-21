@@ -1,11 +1,11 @@
-﻿excel_vba
+excel_vba
 =========
 excelをDBとして利用できるように、vbaを使ってカスタマイズ
 
 
 サンプルクラス : sampletool.cls
 ----------
-Excelのシート状にコントロールを配置して、それらから共通モジュールを呼び出す形でサンプルを作っています。
+Excelのシート上にコントロールを配置して、それらから共通モジュールを呼び出す形でサンプルを作っています。
 
 サンプルモジュール : sample.bas
 ----------
@@ -27,8 +27,16 @@ Array処理クラス : clDatArr.cls
   * 2次元配列(arrA)を、2次元配列(dat)に追加して返す。`addArray(***) As Boolean`
   * 2次元配列(arr)を、(newRow, newCol)の2次元配列に整形して返す。`formatArray(***) As Boolean`
   * 2次元配列(arr)の指定列に、1列挿入し値を埋める。処理後の2次元配列は1列増える。`insertColIntoArray(***) As Boolean`
+  * 2次元配列(arr)の指定列を削除。処理後の2次元配列は1列減る。`removeColFromArray(***) As Boolean`
   * 2次元配列で、あるレコード(行)のすべての要素(列)がEmptlyの場合、削除する。`removeEmptyRecord(***) As Boolean`
   * 2次元配列の中に、同じレコード(行)が存在した場合、一つを残して他のレコードを削除する処理を追加する。`removeDuplication(***) As Boolean`
+  * 2次元配列を1行ずつCollectionに入れなおす。`cnvArrToColl(***) As Boolean`
+  * Collectionの中身を2次元配列に入れなおす。`cnvCollToArr(***) As Boolean`
+
+*ディレクトリ処理クラス : clDir.cls
+----------
+  * 指定ディレクトリにフォルダを作る。同名のフォルダが存在した場合、フォルダ名末尾に(#)を付けてカウントアップ。`createFolder(***) As Boolean`
+
 
 ファイル処理クラス : clFiles.cls
 ----------
@@ -36,9 +44,11 @@ Array処理クラス : clDatArr.cls
   * フルパスのCollectionを受け、ファイル名とフォルダ名の2次元Arrayを返す。`getFolderAndFileNameArr(***) As Boolean`
   * ファイルのフルパスを受け、ファイル名と保存されているフォルダ名を返す。`getFolderAndFileName(***) As Boolean`
   * ファイル名を受けてworkbookオブジェクトを取得。`getWorkbookObj(***) As Boolean`
+  * 指定フォルダ内のファイルを、別のフォルダに新しいファイル名でコピーする。`copyFiles(***) As Boolean`
 
 シートの操作クラス : clSheet.cls
 ----------
+  * 指定したRange範囲内にある図形を削除する`deleteObjectInRange(***) As Boolean`
   * 名前を指定してSheetの有無をチェック。`existSheet(***) As Boolean`
   * 名前を指定してSheetを作成。同名のシートが存在した場合その中身を削除する。`initSheet(***)`
   * 名前を指定してSheetを作成。同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。`newSheet(***)`
