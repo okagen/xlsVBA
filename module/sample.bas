@@ -8,11 +8,27 @@ Option Explicit
 '====================
 Sub inputSh_main(ByVal rootPath As String)
     Dim bRet As Boolean
-    Dim inputShDir As String
+    Dim rootDir As String
+    
+
+    'ディーラ名を取得
+    Dim dealers As Variant
+    Dim dealers2 As Variant
+    Dim col As Long
+    Dim row As Long
+    Dim sh As New clSheet
+    Dim da As New clDB
+
+    bRet = sh.getAllDataAsArray(ThisWorkbook, TOOL, 21, 21, 5, 11, dealers, row, col)
+    dealers2 = Application.WorksheetFunction.Transpose(dealers)
+    bRet = da.setDataArr(dbnum.dealer_name, dealers2)
     
     '必要なディレクトリを作成
-    bRet = inputSh_makeDir(inputShDir)
+    bRet = inputSh_makeDir(rootDir)
 
+    'ファイルをコピー
+    bRet = copyConfFile(rootDir)
+    
 
 
 '
@@ -41,25 +57,7 @@ Sub inputSh_main(ByVal rootPath As String)
 '    Dim rngNew As Range
 '    Dim dicFileName As Variant
 '    Set dicFileName = CreateObject("Scripting.Dictionary")
-'    For i = toolSh.rowUL To toolSh.rowLR Step 1
-'            Set rngOrg = ThisWorkbook.Sheets(TOOL). _
-'                                    Range(Cells(i, toolSh.colUL), _
-'                                    Cells(i, toolSh.colUL))
-'            Set rngNew = ThisWorkbook.Sheets(TOOL). _
-'                                    Range(Cells(i, toolSh.colUL + 1), _
-'                                    Cells(i, toolSh.colUL + 1))
-'            'ファイル名の設定がなくなるまでループして、ハッシュテーブルを作成する
-'            If rngOrg.Value = "" Then
-'                Exit For
-'            Else
-'                '新名称がなければ、元ファイル名を設定する
-'                If rngNew.Value = "" Then
-'                    dicFileName.Add rngOrg.Value, rngOrg.Value
-'                Else
-'                    dicFileName.Add rngOrg.Value, rngNew.Value
-'                End If
-'            End If
-'    Next i
+
 '
 '    'パーツ構成マスターファイルをベンダーフォルダへコピーする
 '     bRet = fls.copyFiles(fromPath, toPath, dicFileName)
@@ -84,9 +82,52 @@ Sub inputSh_main(ByVal rootPath As String)
 End Sub
 
 
+'新しいインプットシートをDBシートへ設定
+Private Function copyConfFile(ByVal parentDir As String) As Boolean
+    Dim bRet As Boolean
+    Dim db As New clDB
+    Dim sh As New clSheet
+    Dim confmasterColl As Collection
+    Dim newNames As Variant
+    Dim lastRow As Long
+    Dim da As New clDatArr
+    
+    '$toolシート上の配布時ファイル名を取得
+    bRet = sh.getColDataAsArray(ThisWorkbook, TOOL, _
+                                                toolSh.rowUL, toolSh.colUL + 1, _
+                                                True, newNames, lastRow)
+    bRet = da.removeEmptyRecord(newNames, newNames)
+    
+    'DBシートへペースト
+    bRet = db.setDataArr(dbnum.confmaster_newName, newNames)
+    
+    'オリジナルのパーツ構成マスターのリストを取得
+    Dim orgFiles As New Collection
+    Dim newFileNames As New Collection
+    bRet = db.getDataColl(dbnum.confmaster_orgPath, orgFiles)
+    bRet = db.getDataColl(dbnum.confmaster_newName, newFileNames)
+    
+    '全シートを入れておくためのフォルダを作成
+    Dim newFolderPath As String
+    Dim di As New clDir
+    bRet = di.createFolder(parentDir, INPSH, newFolderPath)
+    
+    'コピー
+    Dim item As Variant
+    Dim FSO As Object
+    Dim newPath As String
+    Dim i As Long
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    For i = 1 To orgFiles.count Step 1
+            newPath = FSO.BuildPath(newFolderPath, newFileNames(i))
+            FSO.copyFile orgFiles(i), newPath, True
+    Next i
+    
+    Set FSO = Nothing
+End Function
 
 '必要なディレクトリを作成
-Function inputSh_makeDir(ByRef inputShDir As String)
+Function inputSh_makeDir(ByRef rootDir As String) As Boolean
     Dim bRet As Boolean
     Dim di As New clDir
     Dim parentDir As String
@@ -94,17 +135,22 @@ Function inputSh_makeDir(ByRef inputShDir As String)
     Dim newPath As String
 
     'デスクトップに親フォルダ(フォルダ名：InputSheets)を作る
-    bRet = di.createFolder(g_desktop, "InputSheets", parentDir)
+    Dim WSH As Variant
+    Dim dtp As String
+    Set WSH = CreateObject("Wscript.Shell")
+    dtp = WSH.SpecialFolders("Desktop")
+    Set WSH = Nothing
+    bRet = di.createFolder(dtp, "InputSheets", parentDir)
 
     'シート：TOOL内のディーラー名を読み取って、ディーラごとのフォルダを親フォルダ(フォルダ名：InputSheets)内に作成
-    For i = 1 To g_dealers.count Step 1
-        bRet = di.createFolder(parentDir, g_dealers(i), newPath)
+    Dim dealers As New Collection
+    Dim da As New clDatArr
+    bRet = da.getDataColl(dbnum.dealer_name, dealers)
+    For i = 1 To dealers.count Step 1
+        bRet = di.createFolder(parentDir, dealers(i), newPath)
     Next i
     
-    '全シートを入れておくためのフォルダを作成
-    bRet = di.createFolder(parentDir, INPSH, newPath)
-    
-    inputShDir = parentDir
+    rootDir = parentDir
 End Function
 
 '====================
