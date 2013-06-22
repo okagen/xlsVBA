@@ -1,21 +1,6 @@
 Attribute VB_Name = "verify"
 Option Explicit
 
-'最大行番号
-Public Const MAX_ROW = 65536
-
-Enum shCond
-
-    'データの領域はA6からスタート
-    datRowS = 6
-    datColS = 1
-    
-    'データの領域はG（7列）まで
-    datColE = 7
-
-End Enum
-
-
 '*** clAxCtrl内メソッド ***
 '==================================================
 Sub verify_clAxCtrl_putChkBoxesV()
@@ -57,8 +42,8 @@ End Sub
 
 '*** clDatArr内メソッド ***
 '==================================================
-Sub verify_clDatArr_removeEmptyRecord()
-    Dim datBucket(1 To 10, 1 To 10)
+Sub verify_clDatArr_removeDuplication()
+    Dim datBucket As Variant
     Dim row As Long
     Dim col As Long
     Dim sh As New clSheet
@@ -71,9 +56,61 @@ Sub verify_clDatArr_removeEmptyRecord()
 
     '=======================
     'create Array for test
-    For row = 1 To 10 Step 1
-        For col = 1 To 10 Step 1
-            datBucket(row, col) = "org(" & row & "," & col & ")"
+    ReDim datBucket(1 To 15, 1 To 15)
+    
+    For row = 1 To UBound(datBucket, 1) Step 1
+        For col = 1 To UBound(datBucket, 2) Step 1
+            datBucket(row, col) = "org(" & row Mod 3 & "," & col Mod 3 & ")"
+            datBucket(row, 2) = row
+        Next col
+    Next row
+    '=======================
+    
+    bRet = datArr.removeDuplication(datBucket, newDat, 2)
+    If Not bRet Then
+        Exit Sub
+    End If
+    
+    retRow = UBound(newDat, 1)
+    retCol = UBound(newDat, 2)
+    
+    If bRet = True Then
+        Set wb = ThisWorkbook
+        'initialize the sheet to verification
+        bRet = sh.initSheet(wb, "$verify")
+        'plot all data on the $verify sheet
+        With wb.Sheets("$verify")
+            .Select
+            .Range(Cells(1, 1), Cells(retRow, retCol)) = newDat
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+    
+End Sub
+
+
+'==================================================
+Sub verify_clDatArr_removeEmptyRecord()
+    Dim datBucket As Variant
+    Dim row As Long
+    Dim col As Long
+    Dim sh As New clSheet
+    Dim datArr As New clDatArr
+    Dim bRet As Boolean
+    Dim newDat As Variant
+    Dim retRow As Long
+    Dim retCol As Long
+    Dim wb As Workbook
+
+    '=======================
+    'create Array for test
+    ReDim datBucket(1 To 15, 1 To 15)
+    
+    For row = 1 To UBound(datBucket, 1) Step 2
+        For col = 1 To UBound(datBucket, 2) Step 2
+            datBucket(row, col) = "org(" & row Mod 3 & "," & col Mod 3 & ")"
         Next col
     Next row
     '=======================
@@ -102,6 +139,54 @@ Sub verify_clDatArr_removeEmptyRecord()
     
 End Sub
 
+'==================================================
+Sub verify_clDatArr_removeColFromArray()
+    Dim datBucket(1 To 10, 1 To 10)
+    Dim row As Long
+    Dim col As Long
+    Dim datArr As New clDatArr
+    Dim sh As New clSheet
+    Dim bRet As Boolean
+    Dim colIndex As Long
+    Dim newDat As Variant
+    Dim retRow As Long
+    Dim retCol As Long
+    Dim wb As Workbook
+
+    '=======================
+    'create Array for test
+    For row = 1 To 10 Step 1
+        For col = 1 To 10 Step 1
+            datBucket(row, col) = "org(" & row & "," & col & ")"
+        Next col
+    Next row
+    
+    colIndex = 0
+    '=======================
+    
+    bRet = datArr.removeColFromArray(datBucket, colIndex, newDat)
+    If Not bRet Then
+        Exit Sub
+    End If
+    
+    retRow = UBound(newDat, 1)
+    retCol = UBound(newDat, 2)
+    
+    If bRet = True Then
+        Set wb = ThisWorkbook
+        'initialize the sheet to verification
+        bRet = sh.initSheet(wb, "$verify")
+        'plot all data on the $verify sheet
+        With wb.Sheets("$verify")
+            .Select
+            .Range(Cells(1, 1), Cells(retRow, retCol)) = newDat
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+    
+End Sub
 '==================================================
 Sub verify_clDatArr_insertColIntoArray()
     Dim datBucket(1 To 10, 1 To 10)
@@ -251,7 +336,200 @@ Sub verify_clDatArr_addArray()
 End Sub
 
 
+'==================================================
+Sub verify_clDatArr_cnvCollToArr()
+
+    Dim coll As New Collection
+    Dim i As Long
+    Dim arrR As Variant
+    Dim arrC As Variant
+    Dim da As New clDatArr
+    Dim bRet As Boolean
+    Dim wb As Workbook
+    Dim sh As New clSheet
+    Dim isR_Y As Boolean
+    Dim isR_N As Boolean
+    
+    '=======================
+    'arguments
+    For i = 1 To 10 Step 1
+        coll.Add ("dat" & i)
+    Next i
+    isR_Y = True
+    isR_N = False
+    '=======================
+    
+    bRet = da.cnvCollToArr(coll, isR_Y, arrR)
+    bRet = da.cnvCollToArr(coll, isR_N, arrC)
+
+    If bRet = True Then
+        Set wb = ThisWorkbook
+        'initialize the sheet to verification
+        bRet = sh.initSheet(wb, "$verify")
+        'plot all data on the $verify sheet
+        With wb.Sheets("$verify")
+            .Select
+            .Range(Cells(1, 1), Cells(1, coll.count)) = arrR
+            .Range(Cells(3, 1), Cells(coll.count + 2, 1)) = arrC
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+End Sub
+
+
+'==================================================
+Sub verify_clDatArr_cnvArrToColl()
+    Dim datBucket As Variant
+    Dim datArr As New clDatArr
+    Dim sh As New clSheet
+    Dim row As Long
+    Dim col As Long
+    Dim wb As Workbook
+    Dim bRet As Boolean
+    Dim i As Long
+
+    '=======================
+    'create Array for test
+    ReDim datBucket(1 To 10, 1 To 10)
+    For row = 1 To UBound(datBucket, 1) Step 1
+        For col = 1 To UBound(datBucket, 2) Step 1
+            datBucket(row, col) = "data(" & row & "," & col & ")"
+        Next col
+    Next row
+    
+    Dim coll As New Collection
+    '=======================
+    
+    bRet = datArr.cnvArrToColl(datBucket, coll)
+
+    If bRet = True Then
+        Set wb = ThisWorkbook
+        'initialize the sheet to verification
+        bRet = sh.initSheet(wb, "$verify")
+        'plot all data on the $verify sheet
+        With wb.Sheets("$verify")
+            .Select
+            For i = 1 To coll.count Step 1
+                .Range(Cells(i, 1), Cells(i, 1)) = coll(i)
+            Next i
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+End Sub
+
+'*** clDB内メソッド ***
+'==================================================
+Sub verify_cldB_initDB()
+    Dim db As New clDB
+    Dim bRet As Boolean
+    
+    bRet = db.initDB()
+End Sub
+
+'==================================================
+Sub verify_cldB_setDataColl()
+    Dim db As New clDB
+    Dim i As Long
+    Dim coll As New Collection
+    Dim bRet As Boolean
+    
+    For i = 1 To 5 Step 1
+        coll.Add ("db:" & i)
+    Next i
+    
+    bRet = db.setDataColl(2, coll)
+End Sub
+
+'==================================================
+Sub verify_cldB_setDataArr()
+    Dim db As New clDB
+    Dim i As Long
+    Dim arr As Variant
+    Dim bRet As Boolean
+    
+    ReDim arr(1 To 10, 1 To 1)
+    For i = 1 To 10 Step 1
+        arr(i, 1) = "db:" & i
+    Next i
+    
+    bRet = db.setDataArr(2, arr)
+End Sub
+
+'==================================================
+Sub verify_cldB_getDataColl()
+    Dim db As New clDB
+    Dim coll As New Collection
+    Dim bRet As Boolean
+    
+    bRet = db.getDataColl(2, coll)
+    
+    bRet = db.setDataColl(3, coll)
+End Sub
+
+'==================================================
+Sub verify_cldB_getDataArr()
+    Dim db As New clDB
+    Dim arr As Variant
+    Dim bRet As Boolean
+    
+    bRet = db.getDataArr(2, arr)
+    
+    bRet = db.setDataArr(3, arr)
+End Sub
+
+'*** clDir内メソッド ***
+'==================================================
+Sub verify_clDir_createFolder()
+    Dim di As New clDir
+    Dim WSH As Variant
+    Set WSH = CreateObject("Wscript.Shell")
+    Dim parent As String
+    Dim folder As String
+    Dim newPath As String
+    Dim bRet As Boolean
+    
+    '=======================
+    'arguments
+    parent = WSH.SpecialFolders("Desktop")
+    folder = "sample"
+    '=======================
+    
+    bRet = di.createFolder(parent, folder, newPath)
+    
+    If bRet Then
+        Debug.Print "result ::: done -> " & newPath & " |" & Now
+    Else
+        Debug.Print "err ::: cannot create the folder ->" & folder & " |" & Now
+    End If
+End Sub
+
 '*** clFiles内メソッド ***
+'==================================================
+Sub verify_clFiles_copyFiles()
+    Dim fls As New clFiles
+    Dim bRet As Boolean
+    Dim fromPath As String
+    Dim toPath As String
+    Dim dicFileName As Variant
+    Set dicFileName = CreateObject("Scripting.Dictionary")
+    
+    '=======================
+    'arguments
+    fromPath = "C:\Users\10007434\Desktop\InputSheets\$InputSheets"
+    toPath = "C:\Users\10007434\Desktop\InputSheets\ディーラA"
+    dicFileName.Add "BC-10 ver1.00.xls", "BC10.xls"
+    dicFileName.Add "F-45N ver2.00.xlsx", "F45N.xls"
+    '=======================
+    
+    bRet = fls.copyFiles(fromPath, toPath, dicFileName)
+    
+    Debug.Print "result ::: done " & " |" & Now
+End Sub
+
 '==================================================
 Sub verify_clFiles_getWorkbookObj()
     Dim file As String
@@ -278,8 +556,56 @@ Sub verify_clFiles_getWorkbookObj()
 End Sub
 
 '==================================================
+Sub verify_clFiles_getFolderAndFileNameColl()
+    Dim Path As String
+    Dim pathColl As New Collection
+    Dim folderColl As New Collection
+    Dim nameColl As New Collection
+    Dim sh As New clSheet
+    Dim fls As New clFiles
+    Dim bRet As Boolean
+    Dim i As Long
+    Dim wb As Workbook
+    Dim item As Variant
+   
+    '=======================
+    'The Sheet name for test
+    Path = "C:\Users\10007434\Desktop\my prj\excel_vba\sample_config_master"
+    '=======================
+    
+    'set filter on the sheet
+    bRet = fls.getAllXlsFilePathCol(Path, pathColl)
+    
+    'set filter on the sheet
+    bRet = fls.getFolderAndFileNameColl(pathColl, folderColl, nameColl)
+    
+    If bRet = True Then
+        Set wb = ThisWorkbook
+        'initialize the sheet to verification
+        bRet = sh.initSheet(wb, "$verify")
+        'plot all data on the $verify sheet
+        With wb.Sheets("$verify")
+            .Select
+            i = 1
+            For Each item In folderColl
+                .Range(Cells(i, 1), Cells(i, 1)) = item
+                i = i + 1
+            Next item
+            i = 1
+            For Each item In nameColl
+                .Range(Cells(i, 2), Cells(i, 2)) = item
+                i = i + 1
+            Next item
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+End Sub
+
+'==================================================
 Sub verify_clFiles_getFolderAndFileNameArr()
-    Dim path As String
+    Dim Path As String
     Dim col As New Collection
     Dim dat As Variant
     Dim sh As New clSheet
@@ -288,14 +614,16 @@ Sub verify_clFiles_getFolderAndFileNameArr()
     Dim row As Long
     Dim i As Long
     Dim wb As Workbook
+
     
     '=======================
     'The Sheet name for test
-    path = "C:\Users\10007434\Desktop\my prj\excel_vba\sample_config_master"
+    Path = "C:\Users\10007434\Desktop\my prj\excel_vba\sample_config_master"
+
     '=======================
     
     'set filter on the sheet
-    bRet = fls.getAllXlsFilePathCol(path, col)
+    bRet = fls.getAllXlsFilePathCol(Path, col)
     
     'set filter on the sheet
     bRet = fls.getFolderAndFileNameArr(col, dat)
@@ -318,19 +646,21 @@ End Sub
 
 '==================================================
 Sub verify_clFiles_getFolderAndFileName()
-    Dim path As String
+    Dim Path As String
     Dim folder As String
     Dim file As String
     Dim fls As New clFiles
     Dim bRet As Boolean
+    Dim extFlg As Boolean
     
     '=======================
     'The Sheet name for test
-    path = "C:\Users\10007434\Desktop\my prj\excel_vba\sample_config_master\タイヨウ\F-45N ver2.00.xlsx"
+    Path = "C:\Users\10007434\Desktop\my prj\excel_vba\sample_config_master\タイヨウ\F-45N ver2.00.xlsx"
+    extFlg = False
     '=======================
     
     'set filter on the sheet
-    bRet = fls.getFolderAndFileName(path, folder, file)
+    bRet = fls.getFolderAndFileName(Path, extFlg, folder, file)
     
     Debug.Print "result ::: folder -> "; folder & "   file -> " & file & " |" & Now
     
@@ -338,7 +668,7 @@ End Sub
 
 '==================================================
 Sub verify_clFiles_getAllXlsFilePathCol()
-    Dim path As String
+    Dim Path As String
     Dim dat As New Collection
     Dim sh As New clSheet
     Dim fls As New clFiles
@@ -348,11 +678,11 @@ Sub verify_clFiles_getAllXlsFilePathCol()
     
     '=======================
     'The Sheet name for test
-    path = "C:\Users\10007434\Desktop\my prj\excel_vba\sample_config_master"
+    Path = "C:\Users\10007434\Desktop\my prj\excel_vba\sample_config_master"
     '=======================
     
     'set filter on the sheet
-    bRet = fls.getAllXlsFilePathCol(path, dat)
+    bRet = fls.getAllXlsFilePathCol(Path, dat)
     
     If bRet = True Then
         Set wb = ThisWorkbook
@@ -395,7 +725,7 @@ Sub verify_clSheet_setFilter()
     '=======================
     
     'set filter on the sheet
-    bRet = sh.setFilter(wb, name, shCond.datRowS, shCond.datColS, shCond.datColE, tgtFields)
+    bRet = sh.setFilter(wb, name, 6, 1, 7, tgtFields)
     
 End Sub
 
@@ -421,7 +751,7 @@ Sub verify_clSheet_getRowDataVLookUp()
     '=======================
     
     'get data in the sheet
-    bRet = sh.getRowDataVLookUp(wb, name, shCond.datRowS, shCond.datColS, shCond.datColE, col, str, dat, row)
+    bRet = sh.getRowDataVLookUp(wb, name, 6, 1, 7, col, str, dat, row)
     
     If bRet = True Then
         'initialize the sheet to verification
@@ -436,6 +766,27 @@ Sub verify_clSheet_getRowDataVLookUp()
         Debug.Print "result ::: no data" & " |" & Now
     End If
 End Sub
+
+'==================================================
+Sub verify_clSheet_deleteColData()
+    Dim name As String
+    Dim sh As New clSheet
+    Dim col As Long
+    Dim wb As Workbook
+    Dim bRet As Boolean
+    
+    '=======================
+    'The Sheet name for test
+    name = "sample1"
+    col = 2
+    Set wb = ThisWorkbook
+    '=======================
+    
+    'get data in the sheet
+    bRet = sh.deleteColData(wb, name, 6, col)
+    wb.Sheets(name).Select
+End Sub
+
 
 '==================================================
 Sub verify_clSheet_getColDataAsArray()
@@ -458,7 +809,7 @@ Sub verify_clSheet_getColDataAsArray()
     '=======================
     
     'get data in the sheet
-    bRet = sh.getColDataAsArray(wb, name, shCond.datRowS, col, allowDup, dat, row)
+    bRet = sh.getColDataAsArray(wb, name, 6, col, allowDup, dat, row)
     
     If bRet = True Then
         'initialize the sheet to verification
@@ -484,16 +835,17 @@ Sub verify_clSheet_getAllDataAsArray()
     Dim row As Long
     Dim wb As Workbook
     Dim bRet As Boolean
+    Dim lastRow As Long
     
     '=======================
     'The Sheet name for test
     name = "sample1"
-    
+    lastRow = 10
     Set wb = ThisWorkbook
     '=======================
     
     'get data in the sheet
-    bRet = sh.getAllDataAsArray(wb, name, shCond.datRowS, shCond.datColS, shCond.datColE, dat, row, col)
+    bRet = sh.getAllDataAsArray(wb, name, 6, lastRow, 1, 7, dat, row, col)
     
     If bRet = True Then
         'initialize the sheet to verification
@@ -580,6 +932,32 @@ Sub verify_clSheet_existSheet()
     
 End Sub
 
+'==================================================
+Sub verify_clSheet_deleteObjectInRange()
+    Dim name As String
+    Dim sh As New clSheet
+    Dim bRet As Boolean
+    Dim wb As Workbook
+    Dim rowUL As Long
+    Dim colUL As Long
+    Dim rowLR As Long
+    Dim colLR As Long
+    
+    '=======================
+    'function's arguments for test
+    Set wb = ThisWorkbook
+    name = "$verify"
+    rowUL = 1
+    colUL = 1
+    rowLR = 16
+    colLR = 10
+    '=======================
+    
+    'check existance of the sheet
+    wb.Worksheets(name).Select
+    bRet = sh.deleteObjectInRange(wb, name, rowUL, colUL, rowLR, colLR)
+   
+End Sub
 
 
 '*** clSheets内メソッド ***
@@ -632,7 +1010,7 @@ Sub verify_clSheets_conbineSheets()
     '=======================
     
     'get data in sheets
-    bRet = shs.combineSheets(wb, names, shCond.datRowS, shCond.datColS, shCond.datColE, dat, row)
+    bRet = shs.combineSheets(wb, names, 6, 1, 7, dat, row)
     
     'get number of row and column from array object.
     arrRow = UBound(dat, 1)

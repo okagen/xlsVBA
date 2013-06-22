@@ -50,7 +50,8 @@ Public Function putChkBoxesV(ByVal wb As Workbook, _
             Set rngVal = .Range(.Cells(rowS + i - 1, colVal), .Cells(rowS + i - 1, colVal))
             
             With .OLEObjects.Add(ClassType:="Forms.CheckBox.1")
-                .name = "chkBox_" & i
+                '下の1行を使ってオブジェクトの名前を設定すると、この関数を実行後、他の処理が動かなくなる。
+                '.name = "chkBox_" & i
                 'セルの中央に配置
                 .Left = rngCtrl.Left + rngCtrl.Width / 2 - chkBoxWidth / 2
                 .Top = rngCtrl.Top + rngCtrl.Height / 2 - chkBoxHeight / 2
@@ -63,6 +64,9 @@ Public Function putChkBoxesV(ByVal wb As Workbook, _
         Next
     
     End With
+    
+    Set rngCtrl = Nothing
+    Set rngVal = Nothing
 
     '画面更新をONに戻す
     Application.ScreenUpdating = True

@@ -90,6 +90,41 @@ Public Function getWorkbookObj(ByVal file As String, _
 End Function
 
 '=============================
+'フルパスのCollectionを受け、ファイル名と保存されているフォルダ名のCollectionを返す
+'  [i]fullPaths Excelのフルパスを蓄積したCollection
+'  [o]folders       ファイル名と保存されているフォルダ名の2次元Array
+'  [o]filenames       ファイル名と保存されているフォルダ名の2次元Array
+'--------------------------------------------------
+Public Function getFolderAndFileNameColl(ByVal fullPaths As Collection, _
+                                                                ByRef folders As Collection, _
+                                                                ByRef filenames As Collection _
+                                                                ) As Boolean
+    If fullPaths.count < 1 Then
+        getFolderAndFileNameColl = False
+        Exit Function
+    End If
+    
+    Dim retFolders As New Collection
+    Dim retFiles As New Collection
+    Dim item As Variant
+    Dim file As String
+    Dim folder As String
+    Dim bRet As Boolean
+  
+    For Each item In fullPaths
+        bRet = getFolderAndFileName(item, True, folder, file)
+        If bRet Then
+            retFolders.Add (folder)
+            retFiles.Add (file)
+        End If
+    Next item
+    
+    Set folders = retFolders
+    Set filenames = retFiles
+    getFolderAndFileNameColl = True
+End Function
+
+'=============================
 'フルパスのCollectionを受け、ファイル名と保存されているフォルダ名の2次元Arrayを返す
 '  [i]fullPaths Excelのフルパスを蓄積したCollection
 '  [o]dat       ファイル名と保存されているフォルダ名の2次元Array

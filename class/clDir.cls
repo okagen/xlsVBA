@@ -20,6 +20,13 @@ Public Function createFolder(ByVal parentDir As String, _
                                             ByVal name As String, _
                                             ByRef newDir As String _
                                             ) As Boolean
+    If parentDir = "" Or name = "" Then
+        createFolder = False
+        Debug.Print "err ::: no input parentDir-> (" & parentDir & ")" & _
+                            "/name -> (" & name & ") [func:createFolder()]" & Now
+        Exit Function
+    End If
+                                            
     Dim orgName As String
     Dim tmpName As String
     Dim ret As String

@@ -81,7 +81,7 @@ Public Function combineSheets(ByVal wb As Workbook, _
         'シートの有無をチェック
         If sh.existSheet(wb, shName) Then
             'シート内のDataを取得
-            bRet = sh.getAllDataAsArray(wb, shName, datRowS, datColS, datColE, datBySheet, rowBySheet, colBySheet)
+            bRet = sh.getAllDataAsArray(wb, shName, datRowS, 0, datColS, datColE, datBySheet, rowBySheet, colBySheet)
             If bRet Then
                 '取得したDataをbucketに追加
                 bRet = datArr.addArray(datBySheet, indexRow, retTmpBucket, lastRow)

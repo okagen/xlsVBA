@@ -7,6 +7,12 @@ excelをDBとして利用できるように、vbaを使ってカスタマイズ
 ----------
 Excelのシート上にコントロールを配置して、それらから共通モジュールを呼び出す形でサンプルを作っています。
 
+***
+
+グローバル変数、定数設定モジュール : g_list.bas
+----------
+グローバル変数、定数をイニシャライズするモジュールを作っています。このモジュールはThisWorkbook内の`Private Sub Workbook_Open()`イベントが発生した際に呼び出してます。
+
 サンプルモジュール : sample.bas
 ----------
 クラスを使って、サンプルマクロを組んでみます。出来は荒いですが、ちゃんと作るときにちゃんとします。  
@@ -33,15 +39,23 @@ Array処理クラス : clDatArr.cls
   * 2次元配列を1行ずつCollectionに入れなおす。`cnvArrToColl(***) As Boolean`
   * Collectionの中身を2次元配列に入れなおす。`cnvCollToArr(***) As Boolean`
 
-*ディレクトリ処理クラス : clDir.cls
+ExcelのあるシートをDBとして扱うためのクラス : clDB.cls
+----------
+  * DBシートを作成。無ければ作る、あれば何もしない。`initDB() As Boolean`
+  * DBシートにCollectionを使って値を設定。`setDataColl(***) As Boolean`
+  * DBシートにArrayを使って値を設定。`setDataArr(***) As Boolean`
+  * DBシートから値をCollectionで取得。'getDataColl(***) As Boolean'
+  * DBシートから値をArrayで取得。'getDataArr(***) As Boolean'
+
+ディレクトリ処理クラス : clDir.cls
 ----------
   * 指定ディレクトリにフォルダを作る。同名のフォルダが存在した場合、フォルダ名末尾に(#)を付けてカウントアップ。`createFolder(***) As Boolean`
-
 
 ファイル処理クラス : clFiles.cls
 ----------
   * 指定したディレクトリ配下にある全Excelファイルのフルパス取得。`getAllXlsFilePathCol(***) As Boolean`
   * フルパスのCollectionを受け、ファイル名とフォルダ名の2次元Arrayを返す。`getFolderAndFileNameArr(***) As Boolean`
+  * フルパスのCollectionを受け、ファイル名とフォルダ名のCollectionを返す。`getFolderAndFileNameColl(***) As Boolean`
   * ファイルのフルパスを受け、ファイル名と保存されているフォルダ名を返す。`getFolderAndFileName(***) As Boolean`
   * ファイル名を受けてworkbookオブジェクトを取得。`getWorkbookObj(***) As Boolean`
   * 指定フォルダ内のファイルを、別のフォルダに新しいファイル名でコピーする。`copyFiles(***) As Boolean`
@@ -54,6 +68,7 @@ Array処理クラス : clDatArr.cls
   * 名前を指定してSheetを作成。同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。`newSheet(***)`
   * Sheet内のデータ領域をArrayに格納する。`getAllDataAsArray(***) As Boolean`
   * 指定列の最後の行までのデータを取得しArrayに格納。`getColDataAsArray(***) As Boolean`
+  * 指定列の最後の行までのデータを削除。`deleteColData(***) As Boolean`
   * 指定した文字が、指定列に存在した場合、その行を取得しArrayに格納。`getRowDataVLookUp(***) As Boolean`
 
 シートをまたいだ処理を行うクラス : clSheets.cls

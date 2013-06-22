@@ -130,6 +130,32 @@ Public Function getRowDataVLookUp(ByVal wb As Workbook, _
 End Function
 
 '==================================================
+'指定列の最後の行までのデータを削除
+'  [i]wb                対象のWorkbook
+'  [i]shName            シート名
+'  [i]datRowS           データ領域のスタート行
+'  [i]col               ターゲットの列
+'--------------------------------------------------
+Public Function deleteColData(ByVal wb As Workbook, _
+                                    ByVal shName As String, _
+                                    ByVal datRowS As Long, _
+                                    ByVal col As Long _
+                                    ) As Boolean
+    '指定列の全データ取得
+    Dim lastRow As Long
+    Dim ret As Variant
+    Dim recNum As Long
+    With wb.Sheets(shName)
+        '最終行取得
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
+        'データ削除
+        .Range(.Cells(datRowS, col), .Cells(lastRow, col)).Clear
+    End With
+    
+    deleteColData = True
+End Function
+
+'==================================================
 '指定列の最後の行までのデータを取得しArrayに格納
 'シートの有無チェックは呼び出し側でやっておく
 '  [i]wb                対象のWorkbook
