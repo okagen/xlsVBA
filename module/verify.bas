@@ -510,7 +510,7 @@ End Sub
 '*** clFiles内メソッド ***
 '==================================================
 Sub verify_clFiles_copyFiles()
-    Dim fls As New clFiles
+    Dim FLS As New clFiles
     Dim bRet As Boolean
     Dim fromPath As String
     Dim toPath As String
@@ -525,7 +525,7 @@ Sub verify_clFiles_copyFiles()
     dicFileName.Add "F-45N ver2.00.xlsx", "F45N.xls"
     '=======================
     
-    bRet = fls.copyFiles(fromPath, toPath, dicFileName)
+    bRet = FLS.copyFiles(fromPath, toPath, dicFileName)
     
     Debug.Print "result ::: done " & " |" & Now
 End Sub
@@ -534,7 +534,7 @@ End Sub
 Sub verify_clFiles_getWorkbookObj()
     Dim file As String
     Dim wb As Workbook
-    Dim fls As New clFiles
+    Dim FLS As New clFiles
     Dim bRet As Boolean
     
     '=======================
@@ -545,7 +545,7 @@ Sub verify_clFiles_getWorkbookObj()
     Application.ScreenUpdating = False
     
     'get Workbook object
-    bRet = fls.getWorkbookObj(file, wb)
+    bRet = FLS.getWorkbookObj(file, wb)
     
     If bRet Then
         wb.Close savechanges:=False
@@ -562,7 +562,7 @@ Sub verify_clFiles_getFolderAndFileNameColl()
     Dim folderColl As New Collection
     Dim nameColl As New Collection
     Dim sh As New clSheet
-    Dim fls As New clFiles
+    Dim FLS As New clFiles
     Dim bRet As Boolean
     Dim i As Long
     Dim wb As Workbook
@@ -574,10 +574,10 @@ Sub verify_clFiles_getFolderAndFileNameColl()
     '=======================
     
     'set filter on the sheet
-    bRet = fls.getAllXlsFilePathCol(Path, pathColl)
+    bRet = FLS.getAllXlsFilePathCol(Path, pathColl)
     
     'set filter on the sheet
-    bRet = fls.getFolderAndFileNameColl(pathColl, folderColl, nameColl)
+    bRet = FLS.getFolderAndFileNameColl(pathColl, folderColl, nameColl)
     
     If bRet = True Then
         Set wb = ThisWorkbook
@@ -609,7 +609,7 @@ Sub verify_clFiles_getFolderAndFileNameArr()
     Dim col As New Collection
     Dim dat As Variant
     Dim sh As New clSheet
-    Dim fls As New clFiles
+    Dim FLS As New clFiles
     Dim bRet As Boolean
     Dim row As Long
     Dim i As Long
@@ -623,10 +623,10 @@ Sub verify_clFiles_getFolderAndFileNameArr()
     '=======================
     
     'set filter on the sheet
-    bRet = fls.getAllXlsFilePathCol(Path, col)
+    bRet = FLS.getAllXlsFilePathCol(Path, col)
     
     'set filter on the sheet
-    bRet = fls.getFolderAndFileNameArr(col, dat)
+    bRet = FLS.getFolderAndFileNameArr(col, dat)
     
     If bRet = True Then
         Set wb = ThisWorkbook
@@ -649,7 +649,7 @@ Sub verify_clFiles_getFolderAndFileName()
     Dim Path As String
     Dim folder As String
     Dim file As String
-    Dim fls As New clFiles
+    Dim FLS As New clFiles
     Dim bRet As Boolean
     Dim extFlg As Boolean
     
@@ -660,7 +660,7 @@ Sub verify_clFiles_getFolderAndFileName()
     '=======================
     
     'set filter on the sheet
-    bRet = fls.getFolderAndFileName(Path, extFlg, folder, file)
+    bRet = FLS.getFolderAndFileName(Path, extFlg, folder, file)
     
     Debug.Print "result ::: folder -> "; folder & "   file -> " & file & " |" & Now
     
@@ -671,7 +671,7 @@ Sub verify_clFiles_getAllXlsFilePathCol()
     Dim Path As String
     Dim dat As New Collection
     Dim sh As New clSheet
-    Dim fls As New clFiles
+    Dim FLS As New clFiles
     Dim bRet As Boolean
     Dim i As Long
     Dim wb As Workbook
@@ -682,7 +682,7 @@ Sub verify_clFiles_getAllXlsFilePathCol()
     '=======================
     
     'set filter on the sheet
-    bRet = fls.getAllXlsFilePathCol(Path, dat)
+    bRet = FLS.getAllXlsFilePathCol(Path, dat)
     
     If bRet = True Then
         Set wb = ThisWorkbook
@@ -827,7 +827,7 @@ End Sub
 
 
 '==================================================
-Sub verify_clSheet_getAllDataAsArray()
+Sub verify_clSheet_getDataAsArray()
     Dim name As String
     Dim sh As New clSheet
     Dim dat As Variant
@@ -845,7 +845,7 @@ Sub verify_clSheet_getAllDataAsArray()
     '=======================
     
     'get data in the sheet
-    bRet = sh.getAllDataAsArray(wb, name, 6, lastRow, 1, 7, dat, row, col)
+    bRet = sh.getDataAsArray(wb, name, 6, lastRow, 1, 7, dat, row, col)
     
     If bRet = True Then
         'initialize the sheet to verification
@@ -959,6 +959,63 @@ Sub verify_clSheet_deleteObjectInRange()
    
 End Sub
 
+'*** clMail内メソッド ***
+'==================================================
+Sub verify_clSheets_sendMailer()
+    Dim ml As New clMail
+    Dim bRet As Boolean
+    Dim bodyArr As Variant
+    Dim bodyStr As String
+    Dim i As Long
+    Dim j As Long
+    
+    With ThisWorkbook.Sheets("sample1")
+            bodyArr = .Range(.Cells(1, 1), .Cells(10, 10)).Value
+    End With
+    For i = 1 To 10
+        For j = 1 To 10
+            bodyStr = bodyStr & " " & bodyArr(i, j)
+        Next j
+            bodyStr = bodyStr & vbCrLf
+    Next i
+    
+    bRet = ml.openMailer(ThisWorkbook, "okagen@uchida.co.jp", "タイトル", bodyStr)
+End Sub
+'==================================================
+Sub verify_clSheets_openOutlook()
+    Dim ml As New clMail
+    Dim bRet As Boolean
+    Dim bodyArr As Variant
+    Dim bodyStr As String
+    Dim i As Long
+    Dim j As Long
+    Dim filePath As String
+    
+    Dim FSO As Object
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    filePath = FSO.BuildPath(ThisWorkbook.Path, ThisWorkbook.name)
+    Set FSO = Nothing
+    
+    With ThisWorkbook.Sheets("sample1")
+            bodyArr = .Range(.Cells(1, 1), .Cells(10, 10)).Value
+    End With
+    For i = 1 To 10
+        For j = 1 To 10
+            bodyStr = bodyStr & " " & bodyArr(i, j)
+        Next j
+            bodyStr = bodyStr & vbCrLf
+    Next i
+
+    bRet = ml.openOutlook("test@test.co.jp", "タイトル", bodyStr, filePath)
+End Sub
+
+
+'***動かない***
+Sub verify_clSheets_openMailerWithAttachment()
+    Dim ml As New clMail
+    Dim bRet As Boolean
+    bRet = ml.openMailerWithAttachment("okagen@uchida.co.jp", "タイトル", "本文")
+End Sub
 
 '*** clSheets内メソッド ***
 '==================================================

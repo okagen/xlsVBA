@@ -60,6 +60,11 @@ ExcelのあるシートをDBとして扱うためのクラス : clDB.cls
   * ファイル名を受けてworkbookオブジェクトを取得。`getWorkbookObj(***) As Boolean`
   * 指定フォルダ内のファイルを、別のフォルダに新しいファイル名でコピーする。`copyFiles(***) As Boolean`
 
+メール送信処理クラス : clMail.cls
+----------
+  * アドレス、タイトル、本文を設定しメーラを起動する。（添付ファイルなし）`openMailer(***) As Boolean`
+  * アドレス、タイトル、本文、添付ファイルを設定しoutlookを起動する。`openOutlook(***) As Boolean`
+
 シートの操作クラス : clSheet.cls
 ----------
   * 指定したRange範囲内にある図形を削除する`deleteObjectInRange(***) As Boolean`
