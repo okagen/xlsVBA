@@ -2,7 +2,7 @@ Attribute VB_Name = "sample"
 Option Explicit
 
 '====================
-'インプットシート生成
+'インプットシート生成 メイン関数
 '====================
 Sub inputSh_main(ByVal rootPath As String)
     Dim bRet As Boolean
@@ -14,42 +14,57 @@ Sub inputSh_main(ByVal rootPath As String)
     Dim da As New clDB
     Dim rootDir As String
     
-    'ディーラ名を取得し、DBシートへ保存
+    'TOOLシートからディーラ名を取得
     bRet = sh.getDataAsArray(ThisWorkbook, TOOL, 21, 21, 5, 11, dealers, row, col)
     
-    '2次元配列の行列を入れ替え
+    'ディーラ名は(1,1)(1,2)・・・という配列になっている。(1,1)(2,1)・・・というふうに2次元配列の行列を入れ替え
     dealers2 = Application.WorksheetFunction.Transpose(dealers)
+    
+    'ディーラー名の配列をDBシートに保存する
     bRet = da.setDataArr(dbnum.dealer_name, dealers2)
     
-    '必要なディレクトリを作成
+    'ディーラ毎のディレクトリを作成　ゆくゆくディラー毎に配布するインプットシートを保存する
     bRet = inputSh_makeDir(rootDir)
     
-    'パーツ構成マスターファイルを配布用に名前を変えてインプットシートフォルダへコピー
+    'パーツ構成マスターファイルを配布用の名前に変えてインプットシート保存フォルダへコピー
     bRet = copyConfmasterFile(rootDir)
+    
+    'パーツ構成マスターファイルにUGL管理情報の列を追加（まだできていない）
+    bRet = addColumnForUGL()
     
     'ディーラー毎にインプットシートをコピー
     bRet = dealFilesToDealers(rootDir)
 End Sub
 
-'ディーラー毎にインプットシートをコピー
-Private Function dealFilesToDealers(ByVal parentDir As String)
+
+'パーツ構成マスターファイルにUGL管理情報の列を追加（まだできていない）
+'パーツ構成マスターファイルにUGL管理情報の列が追加されたものをインプットシートと名付ける
+Private Function addColumnForUGL()
+    'オリジナルのパーツ構成マスターのリストを取得
+    Dim prevFiles As New Collection
+    Dim db As New clDB
+    Dim bRet As Boolean
+    bRet = db.getDataColl(dbnum.confmaster_nweFullPath, prevFiles)
     
-    'どのファイルをどのディーラに配布するかの表(配布マトリクス)の状態を取得
+    Dim filePath As String
+    Dim i As Long
+    For i = 1 To prevFiles.count
+        filePath = prevFiles(i)
+        '各ファイルを開きつつ、UGL管理情報を追加する処理をここに入れる
+    Next i
+End Function
+
+
+'ディーラー毎のフォルダ内にインプットシートをコピー
+Private Function dealFilesToDealers(ByVal parentDir As String)
     Dim dealMatrix As Variant
     Dim row As Long
     Dim col As Long
     Dim sh As New clSheet
     Dim bRet As Boolean
-    bRet = sh.getDataAsArray(ThisWorkbook, TOOL, 22, 26, 5, 11, dealMatrix, row, col)
-    
-    'DBシート内の配布用インプットシート名の一覧とディーラ名を取得
     Dim newNames As Collection
     Dim dealers As Collection
     Dim db As New clDB
-    bRet = db.getDataColl(dbnum.confmaster_newName, newNames)
-    bRet = db.getDataColl(dbnum.dealer_name, dealers)
-    
-    '配布用インプットシートの保存先のリストをDBシートに作成
     Dim bVal As Boolean
     Dim i As Long
     Dim j As Long
@@ -58,9 +73,17 @@ Private Function dealFilesToDealers(ByVal parentDir As String)
     Dim fromFiles As New Collection
     Dim toFiles As New Collection
     Dim fromFolder As String
+    
+    'どのファイルをどのディーラに配布するかの表(配布マトリクス)の状態を取得
+    bRet = sh.getDataAsArray(ThisWorkbook, TOOL, 22, 26, 5, 11, dealMatrix, row, col)
+    
+    'DBシート内の配布用インプットシート名の一覧とディーラ名を取得
+    bRet = db.getDataColl(dbnum.confmaster_newName, newNames)
+    bRet = db.getDataColl(dbnum.dealer_name, dealers)
+    
+    'インプットシートのコピー元（保存フォルダ）、コピー先（ディーラ毎）のリストをDBシートに保管
     Set FSO = CreateObject("Scripting.FileSystemObject")
-    fromFolder = FSO.BuildPath(parentDir, inpSh)
-
+    fromFolder = FSO.BuildPath(parentDir, INPSH)
     For i = 1 To UBound(dealMatrix, 1) Step 1
         For j = 1 To UBound(dealMatrix, 2) Step 1
             bVal = dealMatrix(i, j)
@@ -72,10 +95,10 @@ Private Function dealFilesToDealers(ByVal parentDir As String)
             End If
         Next j
     Next i
-    
     bRet = db.setDataColl(dbnum.inpSh_fromPath, fromFiles)
     bRet = db.setDataColl(dbnum.inpSh_toPath, toFiles)
 
+    'DBシートの情報を基に、インプットシートをコピー
     For i = 1 To fromFiles.count Step 1
             FSO.copyFile fromFiles(i), toFiles(i), True
     Next i
@@ -92,33 +115,44 @@ Private Function copyConfmasterFile(ByVal parentDir As String) As Boolean
     Dim newNames As Variant
     Dim lastRow As Long
     Dim da As New clDatArr
+    Dim orgFiles As New Collection
+    Dim newFileNames As New Collection
+    Dim newFolderPath As String
+    Dim di As New clDir
+    Dim item As Variant
+    Dim FSO As Object
+    Dim newPath As String
+    Dim newPathColl As New Collection
+    Dim i As Long
+    
     '$toolシート上の配布時ファイル名を取得
     bRet = sh.getColDataAsArray(ThisWorkbook, TOOL, _
                                                 toolSh.rowUL, toolSh.colUL + 1, _
                                                 True, newNames, lastRow)
     bRet = da.removeEmptyRecord(newNames, newNames)
-    'DBシートへペースト
+    
+    '配布時ファイル名をDBシートへ保管
     bRet = db.setDataArr(dbnum.confmaster_newName, newNames)
-    'オリジナルのパーツ構成マスターのリストを取得
-    Dim orgFiles As New Collection
-    Dim newFileNames As New Collection
+    
+    'DBシートに保管されているパーツ構成マスターのリスト（コピー前のフルパス）を取得
     bRet = db.getDataColl(dbnum.confmaster_orgPath, orgFiles)
     bRet = db.getDataColl(dbnum.confmaster_newName, newFileNames)
-    '全シートを入れておくためのフォルダを作成
-    Dim newFolderPath As String
-    Dim di As New clDir
-    bRet = di.createFolder(parentDir, inpSh, newFolderPath)
-    'コピー
-    Dim item As Variant
-    Dim FSO As Object
-    Dim newPath As String
-    Dim i As Long
+    
+    '全パーツ構成マスターを入れておくためのフォルダを作成
+    bRet = di.createFolder(parentDir, INPSH, newFolderPath)
+    
+    '全パーツ構成マスターを入れておくためのフォルダへパーツ構成マスターをコピー
     Set FSO = CreateObject("Scripting.FileSystemObject")
     For i = 1 To orgFiles.count Step 1
             newPath = FSO.BuildPath(newFolderPath, newFileNames(i))
+            newPathColl.Add (newPath)
             FSO.copyFile orgFiles(i), newPath, True
     Next i
     Set FSO = Nothing
+    
+    'コピー後のパーツ構成マスターのフルパスをDBシートへ保管
+    bRet = db.setDataColl(dbnum.confmaster_nweFullPath, newPathColl)
+    
 End Function
 
 'デスクトップにインプットシート保存用のフォルダを作成
@@ -129,21 +163,24 @@ Function inputSh_makeDir(ByRef rootDir As String) As Boolean
     Dim parentDir As String
     Dim i As Long
     Dim newPath As String
-    'デスクトップに親フォルダ(フォルダ名：InputSheets)を作る
     Dim WSH As Variant
     Dim dtp As String
+    Dim dealers As New Collection
+    Dim da As New clDB
+    
+    'デスクトップに親フォルダ(フォルダ名：InputSheets)を作るrootフォルダと名付ける
     Set WSH = CreateObject("Wscript.Shell")
     dtp = WSH.SpecialFolders("Desktop")
     Set WSH = Nothing
     bRet = di.createFolder(dtp, ROOT, parentDir)
+    
     'シート：TOOL内のディーラー名を読み取って、ディーラごとのフォルダを親フォルダ(フォルダ名：InputSheets)内に作成
-    Dim dealers As New Collection
-    Dim da As New clDB
     bRet = da.getDataColl(dbnum.dealer_name, dealers)
     For i = 1 To dealers.count Step 1
         bRet = di.createFolder(parentDir, dealers(i), newPath)
     Next i
     rootDir = parentDir
+
 End Function
 
 '====================
@@ -232,7 +269,7 @@ Private Sub getDataInConfMaster(ByRef dat As Variant)
     Dim ignoreNames As New Collection
     Dim targetNames As New Collection
     Dim wb As Workbook
-    Dim fls As New clFiles
+    Dim FLS As New clFiles
     Dim shs As New clSheets
     Dim sh As New clSheet
     Dim shName
@@ -251,11 +288,12 @@ Private Sub getDataInConfMaster(ByRef dat As Variant)
     ignoreNames.Add ("tool")
     ignoreNames.Add ("$")
     ignoreNames.Add ("ugl-")
+    ignoreNames.Add ("集計")
     '=======================
     index = 1
     For i = 1 To filesColl.count Step 1
         'workbookオブジェクトを取得
-        bRet = fls.getWorkbookObj(filesColl(i), wb)
+        bRet = FLS.getWorkbookObj(filesColl(i), wb)
         
         '検索対象のシート名を取得
         Set targetNames = New Collection
@@ -296,29 +334,33 @@ Private Sub updateConfMasterList(ByVal rootPath As String)
     Dim foldersColl As New Collection
     Dim filenamesColl As New Collection
     Dim bRet As Boolean
-    Dim fls As New clFiles
+    Dim FLS As New clFiles
     Dim filenamesArr As Variant
     Dim filenamesCount As Long
     Dim db As New clDB
-    Dim wb As Workbook
     Dim sh As New clSheet
     Dim lastRow As Long
     Dim ax As New clAxCtrl
+    Dim wb As Workbook
+    Dim rng As Range
+    
     'パーツ構成マスタファイルのフルパスを取得
-    bRet = fls.getAllXlsFilePathCol(rootPath, filesColl)
+    bRet = FLS.getAllXlsFilePathCol(rootPath, filesColl)
     'フルパスからフォルダ名と、ファイル名を取得
-    bRet = fls.getFolderAndFileNameColl(filesColl, foldersColl, filenamesColl)
+    bRet = FLS.getFolderAndFileNameColl(filesColl, foldersColl, filenamesColl)
     'それぞれをDBシートへ出力(後から使うため、DBシートへ保存)
     bRet = db.setDataColl(dbnum.confmaster_orgPath, filesColl)
     bRet = db.setDataColl(dbnum.confmaster_foldername, foldersColl)
     bRet = db.setDataColl(dbnum.confmaster_filename, filenamesColl)
     'リスト部分全体の初期化
     Set wb = ThisWorkbook
-    With wb.Sheets(TOOL).Range(Cells(toolSh.rowUL, toolSh.colUL), _
-                    Cells(toolSh.rowLR, toolSh.colLR))
-        .Clear
-        .Interior.Color = RGB(0, 32, 96)
+    With wb.Worksheets(TOOL)
+        Set rng = .Range(.Cells(toolSh.rowUL, toolSh.colUL), _
+                                    .Cells(toolSh.rowLR, toolSh.colLR))
+        rng.Clear
+        rng.Interior.Color = RGB(0, 32, 96)
     End With
+
     '既に配置されているチェックボックスを削除
     bRet = sh.deleteObjectInRange(ThisWorkbook, TOOL, _
                                                     toolSh.rowUL, toolSh.colUL, _
