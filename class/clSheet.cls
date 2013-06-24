@@ -234,7 +234,7 @@ End Function
 '  [o]row       最終行数
 '  [o]col       列数
 '--------------------------------------------------
-Public Function getAllDataAsArray(ByVal wb As Workbook, _
+Public Function getDataAsArray(ByVal wb As Workbook, _
                                     ByVal shName As String, _
                                     ByVal datRowS As Long, _
                                     ByVal datRowE As Long, _
@@ -261,9 +261,9 @@ Public Function getAllDataAsArray(ByVal wb As Workbook, _
         dat = ret
         col = datColE - datColS + 1
         row = lastRow - datRowS + 1
-        getAllDataAsArray = True
+        getDataAsArray = True
     Else
-        getAllDataAsArray = False
+        getDataAsArray = False
     End If
 End Function
 
@@ -347,7 +347,7 @@ Public Function existSheet(ByVal wb As Workbook, _
 End Function
 
 '==================================================
-'指定したRange範囲内にある図形を削除する
+'指定したRange範囲内にある図形,ActiveXコントロールを削除する
 '  [i]wb            対象のWorkbook
 '  [i]shName    対象のシート名
 '  [i]rowUL       削除対象範囲 左上行番号
@@ -366,8 +366,11 @@ Public Function deleteObjectInRange(ByVal wb As Workbook, _
     Dim rng_shp As Range
     Dim rng As Range
  
-    'Rangeをセレクト
-    Set rng = Range(Cells(rowUL, colUL), Cells(rowLR, colLR))
+    With wb.Worksheets(shName)
+        .Select
+        'Rangeをセレクト
+        Set rng = .Range(.Cells(rowUL, colUL), .Cells(rowLR, colLR))
+    End With
  
     'すべての図形にループ処理
     For Each shp In wb.Worksheets(shName).Shapes
