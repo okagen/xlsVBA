@@ -299,9 +299,12 @@ End Function
 '同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
 '  [i]wb        対象のWorkbook
 '  [i]shName    作成するシート名
+'  [o]newSheet  作成された新しいシートの名前
 '--------------------------------------------------
 Public Function newSheet(ByVal wb As Workbook, _
-                            ByVal shName As String) As String
+                            ByVal shName As String, _
+                            ByRef newSheetName As String _
+                            ) As Boolean
 
     Dim xlsheet As Worksheet
     Dim num As Integer
@@ -322,8 +325,8 @@ Public Function newSheet(ByVal wb As Workbook, _
     
     wb.Worksheets.Add after:=wb.Worksheets(Worksheets.count)
     ActiveSheet.name = newName
-    
-    newSheet = newName
+    newSheetName = newName
+    newSheet = True
     
 End Function
 
