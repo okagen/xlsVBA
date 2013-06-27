@@ -11,6 +11,45 @@ Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
 '==================================================
+'VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する
+'  [i]wb                    対象のWorkbook
+'  [i]shName                シート名
+'  [i]dataRow               データ設定領域のスタート行
+'  [i]dataCol                   データ設定領域の列
+'  [i]lookup_valueCol       VLOOKUP 検索値が入っている列
+'  [i]lookup_range          VLOOKUP 範囲
+'  [i]lookup_colIndex       検索対象列番号
+'--------------------------------------------------
+Public Function setDataByVlookup(ByVal wb As Workbook, _
+                                                    ByVal shName As String, _
+                                                    ByVal dataRow As Long, _
+                                                    ByVal dataCol As Long, _
+                                                    ByVal lookup_valueCol As Long, _
+                                                    ByVal lookup_range As Range, _
+                                                    ByVal lookup_colIndex As Long _
+                                                    ) As Boolean
+    Dim i As Long
+    Dim lastRow As Long
+    Dim rng As Range
+    With wb.Worksheets(shName)
+        '最終行取得
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
+        
+        For i = dataRow To lastRow Step 1
+            '関数設定セルを取得
+            Set rng = .Range(.Cells(i, dataCol), .Cells(i, dataCol))
+            rng = WorksheetFunction.VLookup( _
+                                    .Range(.Cells(i, lookup_valueCol), .Cells(i, lookup_valueCol)), _
+                                    lookup_range, _
+                                    lookup_colIndex, _
+                                    False)
+        Next i
+    End With
+    Set rng = Nothing
+    setDataByVlookup = True
+End Function
+
+'==================================================
 '指定Sheetの指定列にAutoFilterをかける
 '  [i]wb        対象のWorkbook
 '  [i]shName    シート名

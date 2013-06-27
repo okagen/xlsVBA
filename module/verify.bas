@@ -31,7 +31,7 @@ Sub verify_clAxCtrl_putChkBoxesV()
     If bRet Then
         bRet = sh.initSheet(wb, name)
     Else
-        bRet = sh.newSheet(wb, name)
+        bRet = sh.newSheet(wb, name, name)
     End If
     
     'put check boxes on the seet
@@ -704,7 +704,98 @@ End Sub
 
 
 
+'*** clMail内メソッド ***
+'==================================================
+Sub verify_clMail_sendMailer()
+    Dim ml As New clMail
+    Dim bRet As Boolean
+    Dim bodyArr As Variant
+    Dim bodyStr As String
+    Dim i As Long
+    Dim j As Long
+    
+    With ThisWorkbook.Sheets("sample1")
+            bodyArr = .Range(.Cells(1, 1), .Cells(10, 10)).Value
+    End With
+    For i = 1 To 10
+        For j = 1 To 10
+            bodyStr = bodyStr & " " & bodyArr(i, j)
+        Next j
+            bodyStr = bodyStr & vbCrLf
+    Next i
+    
+    bRet = ml.openMailer(ThisWorkbook, "okagen@uchida.co.jp", "タイトル", bodyStr)
+End Sub
+'==================================================
+Sub verify_clMail_openOutlook()
+    Dim ml As New clMail
+    Dim bRet As Boolean
+    Dim bodyArr As Variant
+    Dim bodyStr As String
+    Dim i As Long
+    Dim j As Long
+    Dim filePath As String
+    
+    Dim FSO As Object
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    filePath = FSO.BuildPath(ThisWorkbook.Path, ThisWorkbook.name)
+    Set FSO = Nothing
+    
+    With ThisWorkbook.Sheets("sample1")
+            bodyArr = .Range(.Cells(1, 1), .Cells(10, 10)).Value
+    End With
+    For i = 1 To 10
+        For j = 1 To 10
+            bodyStr = bodyStr & " " & bodyArr(i, j)
+        Next j
+            bodyStr = bodyStr & vbCrLf
+    Next i
+
+    bRet = ml.openOutlook("test@test.co.jp", "タイトル", bodyStr, filePath)
+End Sub
+
+
+'***動かない***
+Sub verify_clMail_openMailerWithAttachment()
+    Dim ml As New clMail
+    Dim bRet As Boolean
+    bRet = ml.openMailerWithAttachment("okagen@uchida.co.jp", "タイトル", "本文")
+End Sub
+
 '*** clSheet内メソッド ***
+'==================================================
+Sub verify_clSheet_setDataByVlookup()
+    Dim name As String
+    Dim sh As New clSheet
+    Dim bRet As Boolean
+    Dim tbl As String
+    Dim wb As Workbook
+    Dim wb2 As Workbook
+    Dim rng As Range
+    
+    '=======================
+    'The Sheet name for test
+    name = "$verify"
+    'tbl = "'$PartsMaster'!B:F"
+    tbl = "'C:\Users\10007434\Desktop\[Book1.xlsx]Sheet1'!$A:$B"
+    Set wb = ThisWorkbook
+    'Set rng = wb.Worksheets("$PartsMaster").Range("B:F")
+    Set wb2 = Excel.Workbooks.Open("C:\Users\10007434\Desktop\Book1.xlsx")
+    Set rng = wb2.Worksheets("Sheet1").Range("A:B")
+    '=======================
+    
+    'set vlookup fromula
+    bRet = sh.setDataByVlookup(wb, name, 2, 2, 1, rng, 2)
+    
+    If bRet = True Then
+            Debug.Print "result ::: done " & " |" & Now
+    Else
+        Debug.Print "err::: **** " & " |" & Now
+    End If
+    
+End Sub
+
+
 '==================================================
 Sub verify_clSheet_setFilter()
     Dim name As String
@@ -893,6 +984,7 @@ Sub verify_clSheet_newSheet()
     Dim sh As New clSheet
     Dim newName As String
     Dim wb As Workbook
+    Dim bRet As Boolean
      
     '=======================
     'The Sheet name for test
@@ -902,7 +994,7 @@ Sub verify_clSheet_newSheet()
     '=======================
     
     'get new sheet name
-    newName = sh.newSheet(wb, name)
+    bRet = sh.newSheet(wb, name, newName)
     
     Debug.Print "result ::: sheet name is-->" & newName & " |" & Now
 End Sub
@@ -959,63 +1051,6 @@ Sub verify_clSheet_deleteObjectInRange()
    
 End Sub
 
-'*** clMail内メソッド ***
-'==================================================
-Sub verify_clSheets_sendMailer()
-    Dim ml As New clMail
-    Dim bRet As Boolean
-    Dim bodyArr As Variant
-    Dim bodyStr As String
-    Dim i As Long
-    Dim j As Long
-    
-    With ThisWorkbook.Sheets("sample1")
-            bodyArr = .Range(.Cells(1, 1), .Cells(10, 10)).Value
-    End With
-    For i = 1 To 10
-        For j = 1 To 10
-            bodyStr = bodyStr & " " & bodyArr(i, j)
-        Next j
-            bodyStr = bodyStr & vbCrLf
-    Next i
-    
-    bRet = ml.openMailer(ThisWorkbook, "okagen@uchida.co.jp", "タイトル", bodyStr)
-End Sub
-'==================================================
-Sub verify_clSheets_openOutlook()
-    Dim ml As New clMail
-    Dim bRet As Boolean
-    Dim bodyArr As Variant
-    Dim bodyStr As String
-    Dim i As Long
-    Dim j As Long
-    Dim filePath As String
-    
-    Dim FSO As Object
-    Set FSO = CreateObject("Scripting.FileSystemObject")
-    filePath = FSO.BuildPath(ThisWorkbook.Path, ThisWorkbook.name)
-    Set FSO = Nothing
-    
-    With ThisWorkbook.Sheets("sample1")
-            bodyArr = .Range(.Cells(1, 1), .Cells(10, 10)).Value
-    End With
-    For i = 1 To 10
-        For j = 1 To 10
-            bodyStr = bodyStr & " " & bodyArr(i, j)
-        Next j
-            bodyStr = bodyStr & vbCrLf
-    Next i
-
-    bRet = ml.openOutlook("test@test.co.jp", "タイトル", bodyStr, filePath)
-End Sub
-
-
-'***動かない***
-Sub verify_clSheets_openMailerWithAttachment()
-    Dim ml As New clMail
-    Dim bRet As Boolean
-    bRet = ml.openMailerWithAttachment("okagen@uchida.co.jp", "タイトル", "本文")
-End Sub
 
 '*** clSheets内メソッド ***
 '==================================================
