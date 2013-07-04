@@ -11,6 +11,69 @@ Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
 '==================================================
+'列番号をアルファベットに変換する
+'  [i]colNo          VLOOKUP 範囲
+'  [o]colStr       検索対象列番号
+'--------------------------------------------------
+Public Function colNo2Txt(ByVal colNo As Long, _
+                                        ByRef colStr As String _
+                                        ) As Boolean
+  On Error GoTo ErrHandler
+  Dim strAddr As String
+
+  strAddr = Cells(1, colNo).Address(False, False)
+  colStr = Left(strAddr, Len(strAddr) - 1)
+  colNo2Txt = True
+  Exit Function
+
+ErrHandler:
+
+  colStr = ""
+  colNo2Txt = False
+End Function
+'
+'==================================================
+'VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する（サイレントモード）
+'  [i]wb                    対象のWorkbook
+'  [i]shName                シート名
+'  [i]dataRow               データ設定領域のスタート行
+'  [i]dataCol                データ設定領域の列
+'  [i]dbFilePath            VLOOKUP元のファイル名
+'  [i]dbSheet               VLOOKUP元のシート名
+'  [i]lookup_valueCol       VLOOKUP 検索値が入っている列
+'  [i]dbRangeStr              VLOOKUP 範囲
+'  [i]lookup_colIndex       検索対象列番号
+'--------------------------------------------------
+Public Function setDataByVlookupSilently(ByVal wb As Workbook, _
+                                                    ByVal shName As String, _
+                                                    ByVal dataRow As Long, _
+                                                    ByVal dataCol As Long, _
+                                                    ByVal dbFilePath As String, _
+                                                    ByVal dbSheet As String, _
+                                                    ByVal lookup_valueCol As Long, _
+                                                    ByVal dbRangeStr As String, _
+                                                    ByVal lookup_colIndex As Long _
+                                                    ) As Boolean
+    Dim fl As New clFiles
+    Dim wbDb As Workbook
+    Dim bRet As Boolean
+    Dim lookup_range As Range
+
+    bRet = fl.getWorkbookObj(dbFilePath, wbDb)
+    If bRet = True Then
+        With wbDb.Worksheets(dbSheet)
+            Set lookup_range = .Range(dbRangeStr)
+            bRet = setDataByVlookup(wb, shName, dataRow, dataCol, lookup_valueCol, lookup_range, lookup_colIndex)
+        End With
+        wbDb.Close
+        Set wbDb = Nothing
+        Set lookup_range = Nothing
+    End If
+
+    setDataByVlookupSilently = bRet
+End Function
+
+'==================================================
 'VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する
 '  [i]wb                    対象のWorkbook
 '  [i]shName                シート名
@@ -30,22 +93,44 @@ Public Function setDataByVlookup(ByVal wb As Workbook, _
                                                     ) As Boolean
     Dim i As Long
     Dim lastRow As Long
-    Dim rng As Range
+    Dim rngSet As Range
+    Dim rngValue As Range
+    Dim result As Variant
+    
     With wb.Worksheets(shName)
         '最終行取得
         lastRow = .UsedRange.Cells(.UsedRange.count).row
         
         For i = dataRow To lastRow Step 1
             '関数設定セルを取得
-            Set rng = .Range(.Cells(i, dataCol), .Cells(i, dataCol))
-            rng = WorksheetFunction.VLookup( _
-                                    .Range(.Cells(i, lookup_valueCol), .Cells(i, lookup_valueCol)), _
-                                    lookup_range, _
-                                    lookup_colIndex, _
-                                    False)
+            Set rngSet = .Range(.Cells(i, dataCol), .Cells(i, dataCol))
+            Set rngValue = .Range(.Cells(i, lookup_valueCol), .Cells(i, lookup_valueCol))
+
+            'expression.VLookup(Arg1, Arg2, Arg3, Arg4)
+            'Arg1    Required
+            '           Variant Lookup_value - the value to search in the first column of the table array. Lookup_value can be a value or a reference. If lookup_value is smaller than the smallest value in the first column of table_array, VLOOKUP returns the #N/A error value.
+            'Arg2    Required
+            '           Variant Table_array - two or more columns of data. Use a reference to a range or a range name. The values in the first column of table_array are the values searched by lookup_value. These values can be text, numbers, or logical values. Uppercase and lowercase text are equivalent.
+            'Arg3    Required
+            '           Variant Col_index_num - the column number in table_array from which the matching value must be returned. A col_index_num of 1 returns the value in the first column in table_array; a col_index_num of 2 returns the value in the second column in table_array, and so on.
+            'Arg4    Optional
+            '           Variant Range_lookup - a logical value that specifies whether you want VLOOKUP to find an exact match or an approximate match:
+
+            If rngValue.Value <> "" Then
+                 On Error Resume Next
+                 result = WorksheetFunction.VLookup( _
+                                        rngValue.Value, _
+                                        lookup_range, _
+                                        lookup_colIndex, _
+                                        False)
+                                        
+                 If Err <> 0 Then result = ""
+                 rngSet = result
+            End If
         Next i
     End With
-    Set rng = Nothing
+    Set rngSet = Nothing
+    Set rngValue = Nothing
     setDataByVlookup = True
 End Function
 
