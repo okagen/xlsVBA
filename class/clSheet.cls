@@ -11,9 +11,41 @@ Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
 '==================================================
+'2つの列番号をRangeを表すアルファベットに変換する
+'  [i]colNoFrom     Rangeの始まり
+'  [i]colNoTo         Rangeの終わり
+'  [o]rngStr           Rangeを表すアルファベット
+'--------------------------------------------------
+Public Function colNo2Rng(ByVal colNoFrom As Long, _
+                                        ByVal colNoTo As Long, _
+                                        ByRef rngStr As String _
+                                        ) As Boolean
+    Dim colNoFromTxt As String
+    Dim colNoToTxt As String
+    Dim bRet1 As Boolean
+    Dim bRet2 As Boolean
+    
+    '文字列で検索元ファルのRange取得
+    bRet1 = colNo2Txt(colNoFrom, colNoFromTxt)
+    bRet2 = colNo2Txt(colNoTo, colNoToTxt)
+    
+    If bRet1 And bRet2 Then
+        If colNoFrom < colNoTo Then
+            rngStr = colNoFromTxt & ":" & colNoToTxt
+        Else
+            rngStr = colNoToTxt & ":" & colNoFromTxt
+        End If
+        colNo2Rng = True
+    Else
+        rngStr = ""
+        colNo2Rng = False
+    End If
+End Function
+
+'==================================================
 '列番号をアルファベットに変換する
-'  [i]colNo          VLOOKUP 範囲
-'  [o]colStr       検索対象列番号
+'  [i]colNo         列番号
+'  [o]colStr       列番号を表すアルファベット
 '--------------------------------------------------
 Public Function colNo2Txt(ByVal colNo As Long, _
                                         ByRef colStr As String _
@@ -34,40 +66,52 @@ End Function
 '
 '==================================================
 'VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する（サイレントモード）
-'  [i]wb                    対象のWorkbook
-'  [i]shName                シート名
-'  [i]dataRow               データ設定領域のスタート行
-'  [i]dataCol                データ設定領域の列
-'  [i]dbFilePath            VLOOKUP元のファイル名
-'  [i]dbSheet               VLOOKUP元のシート名
-'  [i]lookup_valueCol       VLOOKUP 検索値が入っている列
-'  [i]dbRangeStr              VLOOKUP 範囲
-'  [i]lookup_colIndex       検索対象列番号
+'  [i]main_wb               取得したデータを書き込むWorkbook
+'  [i]main_shName       取得したデータを書き込むWorkbookのシート名
+'  [i]main_dataRow      シート内 検索キーが書いてある列のスタート行
+'  [i]main_keyCol         シート内 検索キーが書いてある列
+'  [i]main_dataCol        シート内 検索結果を書き込む列
+'  [i]from_filePath        参照ファイル名
+'  [i]from_shName       参照ファイルのシート名
+'  [i]from_keyCol         参照シート内 検索キーが書いてある列
+'  [i]from_dataCol       参照シート内  値が書いてある列
 '--------------------------------------------------
-Public Function setDataByVlookupSilently(ByVal wb As Workbook, _
-                                                    ByVal shName As String, _
-                                                    ByVal dataRow As Long, _
-                                                    ByVal dataCol As Long, _
-                                                    ByVal dbFilePath As String, _
-                                                    ByVal dbSheet As String, _
-                                                    ByVal lookup_valueCol As Long, _
-                                                    ByVal dbRangeStr As String, _
-                                                    ByVal lookup_colIndex As Long _
-                                                    ) As Boolean
+Public Function setDataByVlookupSilently(ByVal main_wb As Workbook, _
+                                                                ByVal main_shName As String, _
+                                                                ByVal main_dataRow As Long, _
+                                                                ByVal main_keyCol As Long, _
+                                                                ByVal main_dataCol As Long, _
+                                                                ByVal from_filePath As String, _
+                                                                ByVal from_shName As String, _
+                                                                ByVal from_keyCol As Long, _
+                                                                ByVal from_dataCol As Long _
+                                                                ) As Boolean
     Dim fl As New clFiles
-    Dim wbDb As Workbook
     Dim bRet As Boolean
-    Dim lookup_range As Range
-
-    bRet = fl.getWorkbookObj(dbFilePath, wbDb)
+    Dim from_rng As Range
+    
+    '検索元のファイルを開きオブジェクト取得
+    Dim from_wb As Workbook
+    bRet = fl.getWorkbookObj(from_filePath, from_wb)
+    
+    '2つの列番号をRangeを表すアルファベットに変換する
+    Dim from_rng_txt As String
+    bRet = colNo2Rng(from_keyCol, from_dataCol, from_rng_txt)
+    
     If bRet = True Then
-        With wbDb.Worksheets(dbSheet)
-            Set lookup_range = .Range(dbRangeStr)
-            bRet = setDataByVlookup(wb, shName, dataRow, dataCol, lookup_valueCol, lookup_range, lookup_colIndex)
+        'シートを開き、値を検索
+        With from_wb.Worksheets(from_shName)
+            '検索元シート内のRangeを取得
+            Set from_rng = .Range(from_rng_txt)
+            '値を設定
+            bRet = setDataByVlookup(main_wb, main_shName, _
+                                                    main_dataRow, main_dataCol, _
+                                                    main_keyCol, from_rng, from_dataCol - from_keyCol + 1)
         End With
-        wbDb.Close
-        Set wbDb = Nothing
-        Set lookup_range = Nothing
+        
+        Set from_rng = Nothing
+        from_wb.Close
+        Set from_wb = Nothing
     End If
 
     setDataByVlookupSilently = bRet
@@ -75,21 +119,21 @@ End Function
 
 '==================================================
 'VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する
-'  [i]wb                    対象のWorkbook
-'  [i]shName                シート名
-'  [i]dataRow               データ設定領域のスタート行
-'  [i]dataCol                   データ設定領域の列
-'  [i]lookup_valueCol       VLOOKUP 検索値が入っている列
-'  [i]lookup_range          VLOOKUP 範囲
-'  [i]lookup_colIndex       検索対象列番号
+'  [i]main_wb               取得したデータを書き込むWorkbook
+'  [i]main_shName       取得したデータを書き込むWorkbookのシート名
+'  [i]main_dataRow      シート内 検索キーが書いてある列のスタート行
+'  [i]main_dataCol        シート内 検索結果を書き込む列
+'  [i]main_keyCol         シート内 検索キーが書いてある列
+'  [i]from_rng             参照先のRange
+'  [i]from_dataIndex       参照先のRange内で値が書いてある列
 '--------------------------------------------------
-Public Function setDataByVlookup(ByVal wb As Workbook, _
-                                                    ByVal shName As String, _
-                                                    ByVal dataRow As Long, _
-                                                    ByVal dataCol As Long, _
-                                                    ByVal lookup_valueCol As Long, _
-                                                    ByVal lookup_range As Range, _
-                                                    ByVal lookup_colIndex As Long _
+Public Function setDataByVlookup(ByVal main_wb As Workbook, _
+                                                    ByVal main_shName As String, _
+                                                    ByVal main_dataRow As Long, _
+                                                    ByVal main_dataCol As Long, _
+                                                    ByVal main_keyCol As Long, _
+                                                    ByVal from_rng As Range, _
+                                                    ByVal from_dataIndex As Long _
                                                     ) As Boolean
     Dim i As Long
     Dim lastRow As Long
@@ -97,33 +141,22 @@ Public Function setDataByVlookup(ByVal wb As Workbook, _
     Dim rngValue As Range
     Dim result As Variant
     
-    With wb.Worksheets(shName)
+    With main_wb.Worksheets(main_shName)
         '最終行取得
         lastRow = .UsedRange.Cells(.UsedRange.count).row
         
-        For i = dataRow To lastRow Step 1
+        For i = main_dataRow To lastRow Step 1
             '関数設定セルを取得
-            Set rngSet = .Range(.Cells(i, dataCol), .Cells(i, dataCol))
-            Set rngValue = .Range(.Cells(i, lookup_valueCol), .Cells(i, lookup_valueCol))
-
-            'expression.VLookup(Arg1, Arg2, Arg3, Arg4)
-            'Arg1    Required
-            '           Variant Lookup_value - the value to search in the first column of the table array. Lookup_value can be a value or a reference. If lookup_value is smaller than the smallest value in the first column of table_array, VLOOKUP returns the #N/A error value.
-            'Arg2    Required
-            '           Variant Table_array - two or more columns of data. Use a reference to a range or a range name. The values in the first column of table_array are the values searched by lookup_value. These values can be text, numbers, or logical values. Uppercase and lowercase text are equivalent.
-            'Arg3    Required
-            '           Variant Col_index_num - the column number in table_array from which the matching value must be returned. A col_index_num of 1 returns the value in the first column in table_array; a col_index_num of 2 returns the value in the second column in table_array, and so on.
-            'Arg4    Optional
-            '           Variant Range_lookup - a logical value that specifies whether you want VLOOKUP to find an exact match or an approximate match:
+            Set rngSet = .Range(.Cells(i, main_dataCol), .Cells(i, main_dataCol))
+            Set rngValue = .Range(.Cells(i, main_keyCol), .Cells(i, main_keyCol))
 
             If rngValue.Value <> "" Then
                  On Error Resume Next
                  result = WorksheetFunction.VLookup( _
                                         rngValue.Value, _
-                                        lookup_range, _
-                                        lookup_colIndex, _
+                                        from_rng, _
+                                        from_dataIndex, _
                                         False)
-                                        
                  If Err <> 0 Then result = ""
                  rngSet = result
             End If

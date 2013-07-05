@@ -78,9 +78,12 @@ ExcelのあるシートをDBとして扱うためのクラス : clDB.cls
   * VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する。`setDataByVlookup(***) As Boolean`
   * VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する（サイレントモード）。`setDataByVlookupSilently(***) As Boolean`
   * 列番号をアルファベットに変換する。`colNo2Txt(***) As Boolean`
+  * 2つの列番号をRangeを表すアルファベットに変換する。`colNo2Rng(***) As Boolean`
 
 シートをまたいだ処理を行うクラス : clSheets.cls
 ----------
   * 複数シートの中のデータを結合して、Arrayに格納。`combineSheets(***) As Boolean`
   * 無視するシート名を引数で受け、検索対象Sheetの名前Collectionを作成。`getTargetSheets(***) As Boolean`
   * 指定Sheetの指定列にAutoFilterをかける。`setFiltet(***)`
+  * VLOOKUP関数を用いて、複数シートを参照してデータを取得する。`getDataFromSheetsByVlookup(***) As Boolean`
+

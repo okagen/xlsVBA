@@ -10,6 +10,56 @@ Attribute VB_Exposed = False
 Option Explicit
 
 '==================================================
+'VLOOKUP関数を用いて、複数シートを参照してデータを取得する
+'  [i]wb                   検索対象Workbook
+'  [i]targetSheets    検索対象シート名のCollection
+'  [i]key                   検索キー
+'  [i]keyCol               検索シート内 キーが書いてある列
+'  [i]dataCol         検索シート内 値の列
+'  [o]ret                   検索結果
+'--------------------------------------------------
+Public Function getDataFromSheetsByVlookup(ByVal wb As Workbook, _
+                                                                        ByRef targetSheets As Collection, _
+                                                                        ByVal key As String, _
+                                                                        ByVal keyCol As Long, _
+                                                                        ByVal dataCol As Long, _
+                                                                        ByRef ret As String _
+                                                                        ) As Boolean
+    Dim sh As New clSheet
+    Dim bRet As Boolean
+    Dim rngTxt As String
+    Dim i As Long
+    Dim result As Variant
+    Dim rng As Range
+    
+    '2つの列番号をRangeを表すアルファベットに変換する
+    bRet = sh.colNo2Rng(keyCol, dataCol, rngTxt)
+    
+    'シートを数分ループ
+    For i = 1 To targetSheets.count Step 1
+        With wb.Worksheets(targetSheets(i))
+            On Error Resume Next
+            Set rng = .Range(rngTxt)
+            result = WorksheetFunction.VLookup( _
+                                   key, _
+                                   rng, _
+                                   dataCol - keyCol + 1, _
+                                   False)
+            If Err <> 0 Then result = ""
+        End With
+        
+        '値を取得できたら関数を抜ける
+        If result <> "" Then
+            ret = result
+            getDataFromSheetsByVlookup = True
+            Exit Function
+        End If
+    Next i
+    
+    getDataFromSheetsByVlookup = False
+End Function
+
+'==================================================
 '無視するシート名を引数で受けて、Book内の検索対象Sheetの名前Collectionを作成
 '  [i]wb                対象のWorkbook
 '  [i]ignoreSheetNames  無視するシート名が入ったCollection
@@ -81,7 +131,7 @@ Public Function combineSheets(ByVal wb As Workbook, _
         'シートの有無をチェック
         If sh.existSheet(wb, shName) Then
             'シート内のDataを取得
-            bRet = sh.getAllDataAsArray(wb, shName, datRowS, 0, datColS, datColE, datBySheet, rowBySheet, colBySheet)
+            bRet = sh.getDataAsArray(wb, shName, datRowS, 0, datColS, datColE, datBySheet, rowBySheet, colBySheet)
             If bRet Then
                 '取得したDataをbucketに追加
                 bRet = datArr.addArray(datBySheet, indexRow, retTmpBucket, lastRow)
