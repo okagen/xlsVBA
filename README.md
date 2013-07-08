@@ -79,6 +79,7 @@ ExcelのあるシートをDBとして扱うためのクラス : clDB.cls
   * VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する（サイレントモード）。`setDataByVlookupSilently(***) As Boolean`
   * 列番号をアルファベットに変換する。`colNo2Txt(***) As Boolean`
   * 2つの列番号をRangeを表すアルファベットに変換する。`colNo2Rng(***) As Boolean`
+  * 列αに設定されたIDと関連するIDが列βに存在した場合、列βの値を使って列αを検索し、レコードを取得する。例えば型番管理されている商品の後継型番をたどって、最新の商品型番を見つけるような時に利用`getSuccessorID(***) As Boolean`
 
 シートをまたいだ処理を行うクラス : clSheets.cls
 ----------

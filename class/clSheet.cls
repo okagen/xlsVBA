@@ -11,6 +11,68 @@ Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
 '==================================================
+'列αに設定されたIDと関連するIDが列βに存在した場合、列βの値を使って列αを検索し、レコードを取得する。
+'＊型番管理されている商品の後継型番をたどって、最新の商品型番を見つけるような時に利用。
+'＊MSProjectの先行タスクから後続タスクを見つけるような時に利用。
+'  [i]wb            対象のWorkbook
+'  [i]shName    シート名
+'  [i]datRowS   データ領域のスタート行
+'  [i]predCol     PredesessorのIDが書いてある列（一番左の列)
+'  [i]succCol     SuccessorのIDが書いてある列
+'  [i]predID      Successorを検索するPredesessorのID
+'  [o]succID     検索結果
+' ***Predesessor列よりもSuccessor列が右側にあることが前提(predCol < succCol)
+'--------------------------------------------------
+Public Function getSuccessorID(ByVal wb As Workbook, _
+                                                    ByVal shName As String, _
+                                                    ByVal datRowS As Long, _
+                                                    ByVal predCol As Long, _
+                                                    ByVal succCol As Long, _
+                                                    ByVal predID As String, _
+                                                    ByRef succID As String _
+                                                    ) As Boolean
+    Dim bRet As Boolean
+    Dim dat As Variant
+    Dim retID As String
+    Dim prevID As String
+    Dim retRow As Long
+    
+    prevID = predID
+    retID = predID
+    Do While retID <> ""
+       '指定した文字が、指定列に存在した場合、その行を取得しArrayに格納。
+        bRet = getRowDataVLookUp(wb, shName, datRowS, predCol, succCol, predCol, retID, dat, retRow)
+        If bRet = True Then
+            '2レコード以上取得できたら、レコードに重複があるためエラー
+            If UBound(dat, 1) > 1 Then
+                 Debug.Print "err ::: the predesessor ID is duplicated.  (" & retID & ")"
+                getSuccessorID = False
+                Exit Function
+            End If
+        
+            'predesessorとsuccessorのIDが一致した場合、検索が循環してしまうのでエラー
+            retID = dat(1, succCol - predCol + 1)
+            If retID = prevID Then
+                Debug.Print "err ::: the successor ID is same as the predesessor ID (" & retID & ")"
+                getSuccessorID = False
+                Exit Function
+            Else
+                prevID = retID
+            End If
+        Else
+            'successorIDは設定されているが、それに対応するレコードが無い場合エラー
+            Debug.Print "err ::: no record correspond with successor with ID"
+            getSuccessorID = False
+            Exit Function
+        End If
+    Loop
+    
+    succID = dat(1, 1)
+    getSuccessorID = True
+    
+End Function
+
+'==================================================
 '2つの列番号をRangeを表すアルファベットに変換する
 '  [i]colNoFrom     Rangeの始まり
 '  [i]colNoTo         Rangeの終わり
@@ -215,7 +277,7 @@ End Function
 '  [i]datRowS   データ領域のスタート行
 '  [i]datColS   データ領域の最初の列（一番左の列)
 '  [i]datColE   データ領域の最後の列（一番右の列)
-'  [i]col       検索対象列
+'  [i]col       検索対象列(データ領域の最初の列を検索したい場合、datColSを設定する。1ではない)
 '  [i]val       検索文字列
 '  [o]dat       取得したデータ
 '  [o]row       最終行数
