@@ -348,6 +348,7 @@ Public Function getRowDataVLookUp(ByVal wb As Workbook, _
     getRowDataVLookUp = True
 End Function
 
+
 '==================================================
 '指定列の最後の行までのデータを削除
 '  [i]wb                対象のWorkbook
@@ -372,6 +373,38 @@ Public Function deleteColData(ByVal wb As Workbook, _
     End With
     
     deleteColData = True
+End Function
+
+'==================================================
+'指定列の行数を取得
+'※指定列の一番下(MAX_ROW)から検索して、値がある行をの数を返す。スタート行まで値が無い場合、スタート行を返す。
+'  [i]wb                対象のWorkbook
+'  [i]shName            シート名
+'  [i]datRowS           データ領域のスタート行
+'  [i]col               ターゲットの列
+'  [o]row               最終行
+'--------------------------------------------------
+Public Function getLastRow(ByVal wb As Workbook, _
+                                    ByVal shName As String, _
+                                    ByVal datRowS As Long, _
+                                    ByVal col As Long, _
+                                    ByRef row As Long _
+                                    ) As Boolean
+    '指定列の全データ取得
+    Dim lastRow As Long
+    Dim ret As Variant
+    Dim recNum As Long
+    With wb.Sheets(shName)
+        '最終行取得
+        lastRow = .Range(.Cells(MAX_ROW, col), .Cells(MAX_ROW, col)).End(xlUp).row
+    End With
+    
+    If lastRow > datRowS Then
+        row = lastRow
+    Else
+        row = datRowS
+    End If
+    getLastRow = True
 End Function
 
 '==================================================

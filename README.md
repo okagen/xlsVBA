@@ -74,6 +74,7 @@ ExcelのあるシートをDBとして扱うためのクラス : clDB.cls
   * Sheet内のデータ領域をArrayに格納する。`getDataAsArray(***) As Boolean`
   * 指定列の最後の行までのデータを取得しArrayに格納。`getColDataAsArray(***) As Boolean`
   * 指定列の最後の行までのデータを削除。`deleteColData(***) As Boolean`
+  * 指定列の行数を取得。指定列の一番下(MAX_ROW)から検索して、値がある行をの数を返す。スタート行まで値が無い場合、スタート行を返す。`getLastRow(***) As Boolean`
   * 指定した文字が、指定列に存在した場合、その行を取得しArrayに格納。`getRowDataVLookUp(***) As Boolean`
   * VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する。`setDataByVlookup(***) As Boolean`
   * VLOOKUP関数を用いて、別シートまたは別ファイルのデータを参照する（サイレントモード）。`setDataByVlookupSilently(***) As Boolean`
