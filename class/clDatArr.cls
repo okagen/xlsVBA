@@ -9,7 +9,6 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-
 '==================================================
 'Collectionの中身を2次元配列に入れなおす。
 '  [i]coll    Collection
@@ -335,7 +334,7 @@ Private Function getDimension(ByVal arr As Variant, _
     Dim i As Long
 
     On Error Resume Next
-    Do While Err.Number = 0
+    Do While ERR.Number = 0
         i = i + 1
         TempData = UBound(arr, i)
     Loop
@@ -390,7 +389,7 @@ End Function
 
 '==================================================
 '2次元配列(arr)を、2次元配列(dat)に追加して返す
-'datに対して、indexRowで指定された数字を最初のレコードの添え字としてarrを追加する。
+'indexRowで指定された数字をarr最初のレコードの添え字としてdatに追加する。
 '  [i]arr        追加する配列
 '  [i]indexRow    追加する際の先頭レコードの添え字
 '  [i/o]dat       追加される親配列
@@ -433,4 +432,52 @@ Public Function addArray(ByVal arr As Variant, _
     row = indexRow + rowArr - 1
     addArray = True
 End Function
+
+
+
+'==================================================
+'2つの2次元配列を行(row)方向に足し合わせる
+'  [i]arr1        配列1
+'  [i]arr2        配列2
+'  [i/o]dat     足した後の配列
+'  [o]row        足した後の最終レコードの添え字
+'--------------------------------------------------
+Public Function add2Arrays(ByVal arr1 As Variant, _
+                                            ByVal arr2 As Variant, _
+                                            ByRef dat As Variant, _
+                                            ByRef row As Long) As Boolean
+    Dim rowArr1, colArr1, rowArr2, colArr2, newRow, newCol As Long
+    Dim datTmp As Variant
+    
+    rowArr1 = UBound(arr1, 1)
+    colArr1 = UBound(arr1, 2)
+    rowArr2 = UBound(arr2, 1)
+    colArr2 = UBound(arr2, 2)
+    
+    newRow = rowArr1 + rowArr2
+    If colArr1 > colArr2 Then
+      newCol = colArr1
+    Else
+      newCol = colArr2
+    End If
+    ReDim datTmp(1 To newRow, 1 To newCol)
+    
+    Dim i As Long
+    Dim j As Long
+    For i = 1 To rowArr1 Step 1
+        For j = 1 To colArr1
+            datTmp(i, j) = arr1(i, j)
+        Next j
+    Next i
+    
+    For i = 1 To rowArr2 Step 1
+        For j = 1 To colArr2
+            datTmp(rowArr1 + i, j) = arr2(i, j)
+        Next j
+    Next i
+    
+    dat = datTmp
+    row = newRow
+End Function
+
 

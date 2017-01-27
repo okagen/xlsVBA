@@ -19,7 +19,7 @@ Public Function initDB() As Boolean
     Dim sh As New clSheet
     Application.ScreenUpdating = False
     If Not sh.existSheet(ThisWorkbook, TOOLDB) Then
-        ThisWorkbook.Worksheets.Add after:=ThisWorkbook.Worksheets(Worksheets.count)
+        ThisWorkbook.Worksheets.Add After:=ThisWorkbook.Worksheets(Worksheets.count)
         ActiveSheet.name = TOOLDB
     End If
     Application.ScreenUpdating = True

@@ -219,7 +219,7 @@ Public Function setDataByVlookup(ByVal main_wb As Workbook, _
                                         from_rng, _
                                         from_dataIndex, _
                                         False)
-                 If Err <> 0 Then result = ""
+                 If ERR <> 0 Then result = ""
                  rngSet = result
             End If
         Next i
@@ -312,7 +312,7 @@ Public Function getRowDataVLookUp(ByVal wb As Workbook, _
         '***.Findは最初のRangeを基点にして次のRangeから検索してしまう。
         '***.Findの検索基点を最後のRangeにする。
         Set rngTmp = rngCol.Find(What:=val, LookIn:=xlValues, LookAt:=xlPart, _
-                                after:=.Range(.Cells(lastRow, col), .Cells(lastRow, col)))
+                                After:=.Range(.Cells(lastRow, col), .Cells(lastRow, col)))
         '検索できた場合
         If Not rngTmp Is Nothing Then
             '最初に見つかったセルのアドレスを取得
@@ -529,7 +529,7 @@ Public Function initSheet(ByVal wb As Workbook, _
                             ByVal shName As String) As Boolean
                             
     If Not existSheet(wb, shName) Then
-        wb.Worksheets.Add after:=wb.Worksheets(wb.Worksheets.count)
+        wb.Worksheets.Add After:=wb.Worksheets(wb.Worksheets.count)
         ActiveSheet.name = shName
     Else
         With wb.Sheets(shName)
@@ -545,6 +545,46 @@ Public Function initSheet(ByVal wb As Workbook, _
     End If
 
 End Function
+
+'==================================================
+'名前を指定して既存Sheetをコピー。
+'同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
+'  [i]wb        対象のWorkbook
+'  [i]baseSh    コピー元のシート
+'  [i]shName    作成するシート名
+'  [o]newSheet  作成された新しいシートの名前
+'--------------------------------------------------
+Public Function newCopyedSheet(ByVal wb As Workbook, _
+                            ByVal baseSh As Worksheet, _
+                            ByVal shName As String, _
+                            ByRef newSheetName As String _
+                            ) As Boolean
+
+    Dim xlsheet As Worksheet
+    Dim num As Integer
+    Dim flg As Boolean
+    Dim newName As String
+    
+    newName = shName
+    num = 1
+    flg = True
+    Do While flg
+        If Not existSheet(wb, newName) Then
+            flg = False
+        Else
+            newName = shName & " " & Format(num, "(#)")
+            num = num + 1
+        End If
+    Loop
+    
+    baseSh.Copy After:=wb.Worksheets(Worksheets.count)
+    ActiveSheet.name = newName
+    newSheetName = newName
+    newCopyedSheet = True
+    
+End Function
+
+
 
 '==================================================
 '名前を指定してSheetを作成。
@@ -575,7 +615,7 @@ Public Function newSheet(ByVal wb As Workbook, _
         End If
     Loop
     
-    wb.Worksheets.Add after:=wb.Worksheets(Worksheets.count)
+    wb.Worksheets.Add After:=wb.Worksheets(Worksheets.count)
     ActiveSheet.name = newName
     newSheetName = newName
     newSheet = True

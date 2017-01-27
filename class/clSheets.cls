@@ -45,7 +45,7 @@ Public Function getDataFromSheetsByVlookup(ByVal wb As Workbook, _
                                    rng, _
                                    dataCol - keyCol + 1, _
                                    False)
-            If Err <> 0 Then result = ""
+            If ERR <> 0 Then result = ""
         End With
         
         '’l‚ğæ“¾‚Å‚«‚½‚çŠÖ”‚ğ”²‚¯‚é
