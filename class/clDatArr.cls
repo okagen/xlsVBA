@@ -142,7 +142,7 @@ Public Function removeDuplication(ByVal arr As Variant, _
     '不要なレコードを削除
     bRet = formatArray(tmpArr, tmpRow - 1, orgCol, tmpArr)
     If bRet = False Then
-        Debug.Print "err ::: cannot format the array. [func:removeEmptyRecord()]" & Now
+        Debug.Print "err ::: cannot format the array. [func:removeDuplication()]" & Now
         removeDuplication = False
         Exit Function
     End If
@@ -155,10 +155,15 @@ End Function
 '2次元配列で、あるレコード(行)のすべての要素(列)がEmptlyの場合、削除する
 '  [i]arr           対象の配列
 '  [o]newArr         Emptyレコード削除後の配列
+'--------------------
+'メソッド事態が返す値を bool -> integer に変更 2017.2.15
+' 0=処理エラー
+' 1=処理成功
+' 2=一つも
 '--------------------------------------------------
 Public Function removeEmptyRecord(ByVal arr As Variant, _
-                                                            ByRef newArr As Variant _
-                                                            ) As Boolean
+                                    ByRef newArr As Variant _
+                                ) As Integer
     Dim bRet As Boolean
     Dim dimension As Long
     Dim tmpArr As Variant
@@ -168,12 +173,15 @@ Public Function removeEmptyRecord(ByVal arr As Variant, _
     Dim i As Long
     Dim j As Long
     Dim tmpRow As Long
+    Dim allEmptyFLg As Boolean
+    allEmptyFLg = True
+    
     
     '配列の次元数を取得 2次元配列でない場合はエラー
     bRet = getDimension(arr, dimension)
     If bRet = False Or dimension <> 2 Then
         Debug.Print "err ::: dimension ->" & dimension & " [func:removeEmptyRecord()]" & Now
-        removeEmptyRecord = False
+        removeEmptyRecord = 0
         Exit Function
     End If
     
@@ -199,25 +207,34 @@ Public Function removeEmptyRecord(ByVal arr As Variant, _
                 tmpArr(tmpRow, j) = arr(i, j)
             Next j
             tmpRow = tmpRow + 1
+            allEmptyFLg = False
         End If
     Next i
     
-    '不要なレコードを削除
-    bRet = formatArray(tmpArr, tmpRow - 1, orgCol, tmpArr)
-    If bRet = False Then
-        Debug.Print "err ::: cannot format the array. [func:removeEmptyRecord()]" & Now
-        removeEmptyRecord = False
+    If allEmptyFLg = False Then
+        '不要なレコードを削除
+        bRet = formatArray(tmpArr, tmpRow - 1, orgCol, tmpArr)
+        If bRet = False Then
+            Debug.Print "err ::: cannot format the array. [func:removeEmptyRecord()]" & Now
+            removeEmptyRecord = 0
+            Exit Function
+        End If
+        
+        newArr = tmpArr
+        removeEmptyRecord = 1
+        Exit Function
+    Else
+        '全てのレコードがEmptyの場合
+        removeEmptyRecord = 2
         Exit Function
     End If
-    
-    newArr = tmpArr
-    removeEmptyRecord = True
+
 End Function
 
 '==================================================
 '2次元配列(arr)の指定列を削除。処理後の2次元配列は1列減る。
 '  [i]arr           削除元配列
-'  [i]colIndex  挿入列の添え字
+'  [i]colIndex  削除列の添え字
 '  [o]newArr   削除後の配列
 '--------------------------------------------------
 Public Function removeColFromArray(ByVal arr As Variant, _

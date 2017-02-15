@@ -224,5 +224,35 @@ Public Function getAllXlsFilePathCol(ByVal Path As String, _
     End If
 End Function
 
-
+'=============================
+'Workbookと同ディレクトリにある指定した拡張子のファイルのファイル名取得
+'  [o]ret       ファイル名を蓄積したCollection
+'--------------------------------------------------
+Public Function getAllFileNameCol(ByVal ext As String, _
+                                    ByRef ret As Collection) As Boolean
+    Dim FSO As Object
+    Dim folder As Variant
+    Dim file As Variant
+    
+    Dim Path As String
+    Path = ThisWorkbook.Path
+    
+    
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    For Each folder In FSO.getFolder(Path).SubFolders
+        Call getAllXlsFilePathCol(folder.Path, ret)
+    Next folder
+    For Each file In FSO.getFolder(Path).files
+        If InStr(1, file.name, ext, vbTextCompare) > 0 Then
+            ret.Add (file.name)
+        End If
+    Next file
+    Set FSO = Nothing
+    
+    If ret.count < 1 Then
+        getAllFileNameCol = False
+    Else
+        getAllFileNameCol = True
+    End If
+End Function
                             
