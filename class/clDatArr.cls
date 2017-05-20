@@ -77,6 +77,46 @@ Public Function cnvArrToColl(ByVal arr As Variant, _
 End Function
 
 '==================================================
+'2次元配列の指定行を取得する。
+'  [i]arr      対象の配列
+'  [i]row     取得する行の添え字
+'  [o]coll    変換後のCollection
+'--------------------------------------------------
+Public Function getOneLineFromArr(ByVal arr As Variant, _
+                                    ByVal row As Long, _
+                                    ByRef retArr As Variant _
+                                    ) As Boolean
+    Dim bRet As Boolean
+    Dim dimension As Long
+    Dim idx1_min As Long, idx2_min As Long
+    Dim idx1_max As Long, idx2_max As Long
+    Dim i As Long
+    
+    '配列の次元数を取得 2次元配列でない場合はエラー
+    bRet = getDimension(arr, dimension)
+    If bRet = False Or dimension <> 2 Then
+        Debug.Print "err ::: dimension ->" & dimension & " [func:cnvArrToColl()]" & Now
+        getOneLineFromArr = False
+        Exit Function
+    End If
+    
+    idx1_min = LBound(arr, 1) '第1要素の添え字の最小値
+    idx2_min = LBound(arr, 2) '第2要素の添え字の最小値
+    idx1_max = UBound(arr, 1) '第1要素の添え字の最大値
+    idx2_max = UBound(arr, 2) '第2要素の添え字の最大値
+    
+    Dim ret As Variant
+    ReDim ret(idx1_min To idx1_min, idx2_min To idx2_max)
+    For i = idx2_min To idx2_max Step 1
+        ret(idx1_min, i) = arr(row, i)
+    Next i
+    
+    retArr = ret
+    getOneLineFromArr = True
+End Function
+
+
+'==================================================
 '2次元配列の中に、同じレコード(行)が存在した場合、一つを残して他のレコードを削除する処理を追加する。
 '  [i]arr           対象の配列
 '  [o]newArr    行の重複削除後の配列
@@ -130,7 +170,7 @@ Public Function removeDuplication(ByVal arr As Variant, _
         Next j
         
         'Dictionaryオブジェクトを使う。同じ値がなければ返り値用Arrayに追加
-        If Not dic.Exists(oneLine) Then
+        If Not dic.exists(oneLine) Then
             dic.Add oneLine, oneLine
             For j = 1 To orgCol Step 1
                 tmpArr(tmpRow, j) = arr(i, j)
