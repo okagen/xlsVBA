@@ -89,3 +89,7 @@ ExcelのあるシートをDBとして扱うためのクラス : clDB.cls
   * 指定Sheetの指定列にAutoFilterをかける。`setFiltet(***)`
   * VLOOKUP関数を用いて、複数シートを参照してデータを取得する。`getDataFromSheetsByVlookup(***) As Boolean`
 
+フォルダ操作クラス : clFolder.cls
+----------
+  * フルパスを指定してフォルダを作成。同名のフォルダが存在した場合、フォルダ名末尾に(#)を付けてカウントアップ。`mkFolder(***) As Boolean`
+
