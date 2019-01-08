@@ -9,6 +9,40 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
+
+
+'==================================================
+'2次元配列(arr)の、縦横を入れ替える。。
+'  [i]arr       元の配列
+'  [o]newArr       整形後の配列
+'--------------------------------------------------
+Public Function transposeArray(ByVal arr As Variant, _
+                                ByRef dat As Variant _
+                                ) As Boolean
+                            
+    '値を設定する為の、実際のループ処理数を取得
+    Dim loopRow As Long
+    Dim loopCol As Long
+    loopRow = UBound(arr, 1)
+    loopCol = UBound(arr, 2)
+    
+    
+    '2次元配列を整形
+    Dim retTmpBucket As Variant
+    ReDim retTmpBucket(1 To loopCol, 1 To loopRow)
+    Dim i As Long
+    Dim j As Long
+    For i = 1 To loopRow Step 1
+        For j = 1 To loopCol Step 1
+            retTmpBucket(j, i) = arr(i, j)
+        Next j
+    Next i
+
+    dat = retTmpBucket
+    transposeArray = True
+End Function
+
+
 '==================================================
 'Collectionの中身を2次元配列に入れなおす。
 '  [i]coll    Collection
@@ -24,13 +58,13 @@ Public Function cnvCollToArr(ByVal coll As Collection, _
     Dim i As Long
     
     If isRow = True Then
-        ReDim retArr(1 To 1, 1 To coll.count)
-        For i = 1 To coll.count Step 1
+        ReDim retArr(1 To 1, 1 To coll.Count)
+        For i = 1 To coll.Count Step 1
             retArr(1, i) = coll(i)
         Next i
     Else
-        ReDim retArr(1 To coll.count, 1 To 1)
-        For i = 1 To coll.count Step 1
+        ReDim retArr(1 To coll.Count, 1 To 1)
+        For i = 1 To coll.Count Step 1
             retArr(i, 1) = coll(i)
         Next i
     End If

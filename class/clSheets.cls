@@ -36,7 +36,7 @@ Public Function getDataFromSheetsByVlookup(ByVal wb As Workbook, _
     bRet = sh.colNo2Rng(keyCol, dataCol, rngTxt)
     
     'シートを数分ループ
-    For i = 1 To targetSheets.count Step 1
+    For i = 1 To targetSheets.Count Step 1
         With wb.Worksheets(targetSheets(i))
             On Error Resume Next
             Set rng = .Range(rngTxt)
@@ -89,7 +89,7 @@ Public Function getTargetSheets(ByVal wb As Workbook, _
         End If
     Next
    
-    If targetSheets.count < 1 Then
+    If targetSheets.Count < 1 Then
         getTargetSheets = False
     Else
         getTargetSheets = True

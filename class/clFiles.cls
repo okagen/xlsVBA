@@ -99,7 +99,7 @@ Public Function getFolderAndFileNameColl(ByVal fullPaths As Collection, _
                                                                 ByRef folders As Collection, _
                                                                 ByRef filenames As Collection _
                                                                 ) As Boolean
-    If fullPaths.count < 1 Then
+    If fullPaths.Count < 1 Then
         getFolderAndFileNameColl = False
         Exit Function
     End If
@@ -138,13 +138,13 @@ Public Function getFolderAndFileNameArr(ByVal fullPaths As Collection, _
     Dim i As Long
     Dim bRet As Boolean
     
-    If fullPaths.count < 1 Then
+    If fullPaths.Count < 1 Then
         getFolderAndFileNameArr = False
         Exit Function
     End If
     
-    ReDim retTmp(1 To fullPaths.count, 1 To 2)
-    For i = 1 To fullPaths.count Step 1
+    ReDim retTmp(1 To fullPaths.Count, 1 To 2)
+    For i = 1 To fullPaths.Count Step 1
         fullPath = fullPaths(i)
         bRet = getFolderAndFileName(fullPath, True, folder, file)
         If bRet Then
@@ -200,24 +200,24 @@ End Function
 '  [i]path      検索するディレクトリのパス
 '  [o]ret       Excelのフルパスを蓄積したCollection
 '--------------------------------------------------
-Public Function getAllXlsFilePathCol(ByVal Path As String, _
+Public Function getAllXlsFilePathCol(ByVal path As String, _
                                     ByRef ret As Collection) As Boolean
     Dim FSO As Object
     Dim folder As Variant
     Dim file As Variant
     
     Set FSO = CreateObject("Scripting.FileSystemObject")
-    For Each folder In FSO.getFolder(Path).SubFolders
-        Call getAllXlsFilePathCol(folder.Path, ret)
+    For Each folder In FSO.getFolder(path).SubFolders
+        Call getAllXlsFilePathCol(folder.path, ret)
     Next folder
-    For Each file In FSO.getFolder(Path).files
+    For Each file In FSO.getFolder(path).files
         If InStr(file.Type, "Excel") > 0 Then
-            ret.Add (file.Path)
+            ret.Add (file.path)
         End If
     Next file
     Set FSO = Nothing
     
-    If ret.count < 1 Then
+    If ret.Count < 1 Then
         getAllXlsFilePathCol = False
     Else
         getAllXlsFilePathCol = True
@@ -234,22 +234,22 @@ Public Function getAllFileNameCol(ByVal ext As String, _
     Dim folder As Variant
     Dim file As Variant
     
-    Dim Path As String
-    Path = ThisWorkbook.Path
+    Dim path As String
+    path = ThisWorkbook.path
     
     
     Set FSO = CreateObject("Scripting.FileSystemObject")
-    For Each folder In FSO.getFolder(Path).SubFolders
-        Call getAllXlsFilePathCol(folder.Path, ret)
+    For Each folder In FSO.getFolder(path).SubFolders
+        Call getAllXlsFilePathCol(folder.path, ret)
     Next folder
-    For Each file In FSO.getFolder(Path).files
+    For Each file In FSO.getFolder(path).files
         If InStr(1, file.name, ext, vbTextCompare) > 0 Then
             ret.Add (file.name)
         End If
     Next file
     Set FSO = Nothing
     
-    If ret.count < 1 Then
+    If ret.Count < 1 Then
         getAllFileNameCol = False
     Else
         getAllFileNameCol = True

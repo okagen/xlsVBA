@@ -10,6 +10,8 @@ Attribute VB_Exposed = False
 Option Explicit
 Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
+Option Base 1
+
 '==================================================
 '列αに設定されたIDと関連するIDが列βに存在した場合、列βの値を使って列αを検索し、レコードを取得する。
 '＊型番管理されている商品の後継型番をたどって、最新の商品型番を見つけるような時に利用。
@@ -205,7 +207,7 @@ Public Function setDataByVlookup(ByVal main_wb As Workbook, _
     
     With main_wb.Worksheets(main_shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.count).row
+        lastRow = .UsedRange.Cells(.UsedRange.Count).row
         
         For i = main_dataRow To lastRow Step 1
             '関数設定セルを取得
@@ -253,7 +255,7 @@ Public Function setFilter(ByVal wb As Workbook, _
     
     With wb.Worksheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.count).row
+        lastRow = .UsedRange.Cells(.UsedRange.Count).row
         '最終行までのデータRangeを取得
         Set datRng = .Range(.Cells(datRowS - 1, datColS), .Cells(lastRow, datColE))
         'フィルター設定を解除
@@ -261,7 +263,7 @@ Public Function setFilter(ByVal wb As Workbook, _
         'ハッシュテーブルのキーの配列を取得
         fieldKeyArr = tgtFields.keys
         'フィルター設定
-        For i = 0 To tgtFields.count - 1
+        For i = 0 To tgtFields.Count - 1
             datRng.AutoFilter field:=fieldKeyArr(i), Criteria1:=tgtFields(fieldKeyArr(i))
         Next i
     End With
@@ -296,7 +298,7 @@ Public Function getRowDataVLookUp(ByVal wb As Workbook, _
     Dim rngTmp As Range
     Dim firstAddress As String
     Dim retTmpBucket As Variant
-    ReDim retTmpBucket(1 To MAX_ROW, 1 To datColE - datColS + 1)
+    ReDim retTmpBucket(1 To 1048576, 1 To datColE - datColS + 1)
     Dim retTmp As Variant
     Dim tgtRng As Range
     Dim datArr As New clDatArr
@@ -305,7 +307,7 @@ Public Function getRowDataVLookUp(ByVal wb As Workbook, _
     
     With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.count).row
+        lastRow = .UsedRange.Cells(.UsedRange.Count).row
         '最終行までの1列分のデータを取得
         Set rngCol = .Range(.Cells(datRowS, col), .Cells(lastRow, col))
         '検索する
@@ -367,7 +369,7 @@ Public Function deleteColData(ByVal wb As Workbook, _
     Dim recNum As Long
     With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.count).row
+        lastRow = .UsedRange.Cells(.UsedRange.Count).row
         'データ削除
         .Range(.Cells(datRowS, col), .Cells(lastRow, col)).Clear
     End With
@@ -396,7 +398,7 @@ Public Function getLastRow(ByVal wb As Workbook, _
     Dim recNum As Long
     With wb.Sheets(shName)
         '最終行取得
-        lastRow = .Range(.Cells(MAX_ROW, col), .Cells(MAX_ROW, col)).End(xlUp).row
+        lastRow = .Range(.Cells(Rows.Count, col), .Cells(Rows.Count, col)).End(xlUp).row
     End With
     
     If lastRow > datRowS Then
@@ -431,7 +433,7 @@ Public Function getColDataAsArray(ByVal wb As Workbook, _
     Dim recNum As Long
     With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.count).row
+        lastRow = .UsedRange.Cells(.UsedRange.Count).row
         'データ取得
         ret = .Range(.Cells(datRowS, col), .Cells(lastRow, col)).Value
     End With
@@ -439,7 +441,7 @@ Public Function getColDataAsArray(ByVal wb As Workbook, _
     
     
     '重複削除処理
-    Dim retTmp(1 To MAX_ROW, 1 To 1) As Variant
+    Dim retTmp(1 To 1048576, 1 To 1) As Variant
     Dim datArr As New clDatArr
     Dim bRet As Boolean
     If allowDuplicate = False Then
@@ -451,7 +453,7 @@ Public Function getColDataAsArray(ByVal wb As Workbook, _
         Set dic = CreateObject("Scripting.Dictionary")
         For i = 1 To UBound(ret) Step 1
             'dic配列の中に未登録の場合、追加する。
-            If Not dic.Exists(ret(i, 1)) Then
+            If Not dic.exists(ret(i, 1)) Then
                 dic.Add ret(i, 1), ret(i, 1)
                 retTmp(j, 1) = ret(i, 1)
                 j = j + 1
@@ -464,7 +466,12 @@ Public Function getColDataAsArray(ByVal wb As Workbook, _
     End If
     
     '返り値設定
-    If lastRow - datRowS > 0 Then
+    If lastRow - datRowS = 0 Then
+        ReDim dat(1, 1)
+        dat(1, 1) = ret
+        row = recNum
+        getColDataAsArray = True
+    ElseIf lastRow - datRowS > 0 Then
         dat = ret
         row = recNum
         getColDataAsArray = True
@@ -500,7 +507,7 @@ Public Function getDataAsArray(ByVal wb As Workbook, _
     With wb.Sheets(shName)
         '最終行取得
         If datRowE = 0 Then
-            lastRow = .UsedRange.Cells(.UsedRange.count).row
+            lastRow = .UsedRange.Cells(.UsedRange.Count).row
         Else
             lastRow = datRowE
         End If
@@ -529,13 +536,13 @@ Public Function initSheet(ByVal wb As Workbook, _
                             ByVal shName As String) As Boolean
                             
     If Not existSheet(wb, shName) Then
-        wb.Worksheets.Add After:=wb.Worksheets(wb.Worksheets.count)
+        wb.Worksheets.Add After:=wb.Worksheets(wb.Worksheets.Count)
         ActiveSheet.name = shName
     Else
         With wb.Sheets(shName)
             Dim verLastRow As Long
             Dim delRow As String
-            verLastRow = .UsedRange.Cells(.UsedRange.count).row + 1
+            verLastRow = .UsedRange.Cells(.UsedRange.Count).row + 1
             delRow = "1:" & verLastRow
             '行削除
             .Range(delRow).Delete
@@ -577,7 +584,7 @@ Public Function newCopyedSheet(ByVal wb As Workbook, _
         End If
     Loop
     
-    baseSh.Copy After:=wb.Worksheets(Worksheets.count)
+    baseSh.Copy After:=wb.Worksheets(Worksheets.Count)
     ActiveSheet.name = newName
     newSheetName = newName
     newCopyedSheet = True
@@ -615,7 +622,7 @@ Public Function newSheet(ByVal wb As Workbook, _
         End If
     Loop
     
-    wb.Worksheets.Add After:=wb.Worksheets(Worksheets.count)
+    wb.Worksheets.Add After:=wb.Worksheets(Worksheets.Count)
     ActiveSheet.name = newName
     newSheetName = newName
     newSheet = True
@@ -640,6 +647,63 @@ Public Function existSheet(ByVal wb As Workbook, _
     End If
     Set xlsheet = Nothing
 End Function
+
+'==================================================
+'名前を指定(ワイルドカード可)してSheetの有無をチェック
+'  [i]wb        対象のWorkbook
+'  [i]shName    確認するシート名 ワイルドカード可
+'  [o]shNames   一致するシートの名前の配列
+'--------------------------------------------------
+Public Function existSheet_ambiguous(ByVal wb As Workbook, _
+                                     ByVal shName As String, _
+                                     ByRef shNames As Collection) As Boolean
+    On Error Resume Next
+    Dim ret As Boolean
+    ret = False
+    
+    Dim ws As Worksheet
+    For Each ws In wb.Worksheets
+        If ws.name Like shName Then
+            shNames.Add (ws.name)
+            ret = True
+        End If
+    Next
+    
+    existSheet_ambiguous = ret
+
+End Function
+
+
+'==================================================
+'名前を指定(ワイルドカード可)してSheetを検索し、
+'一致するものが有ればprefixを付けてファイル名を変更する。
+'  [i]wb                対象のWorkbook
+'  [i]tgtShName         対象とするシート名 ワイルドカード可
+'  [i]prefix            接頭字(例えば　back_)
+'  [o]changedShNames    変更後のシート名群
+'  changeSheetNameは変更したシートがあれば True、無ければFalseを返す。
+'--------------------------------------------------
+Function changeSheetName(ByRef wb As Workbook, _
+                        ByVal tgtShName As String, _
+                        ByVal prefix As String, _
+                        ByRef changedShNames As Collection) As Boolean
+    Dim ret As Boolean
+    Dim item As Variant
+    Dim shNames As New Collection
+    
+    ret = False
+    
+    If existSheet_ambiguous(wb, tgtShName, shNames) Then
+        For Each item In shNames
+            wb.Worksheets(item).name = prefix & item
+            changedShNames.Add (prefix & item)
+        Next item
+        ret = True
+    End If
+
+    changeSheetName = ret
+End Function
+
 
 '==================================================
 '指定したRange範囲内にある図形,ActiveXコントロールを削除する

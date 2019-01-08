@@ -14,17 +14,17 @@ Option Explicit
 'checkBoxの値と、指定列のセルの値とリンクさせた状態。
 '  [i]wb        対象のWorkbook
 '  [i]shName    checkBoxを配置するシート名
-'  [i]rowS      配置する最初の行
+'  [i]rowSt      配置する最初の行
 '  [i]colVal    リンクするセルの列
 '  [i]colCtrl   checkBoxを配置する列
 '  [i]count     配置する数
 '--------------------------------------------------
 Public Function putChkBoxesV(ByVal wb As Workbook, _
                                 ByVal shName As String, _
-                                ByVal rowS As Long, _
+                                ByVal rowSt As Long, _
                                 ByVal colVal As Long, _
                                 ByVal colCtrl As Long, _
-                                ByVal count As Long) As Boolean
+                                ByVal Count As Long) As Boolean
     Dim objChkBox As OLEObject
     Dim i As Long
     Dim rngCtrl As Range
@@ -42,12 +42,12 @@ Public Function putChkBoxesV(ByVal wb As Workbook, _
     With wb.Worksheets(shName)
         .Select
     
-        For i = 1 To count
+        For i = 1 To Count
             'checkBoxを配置するセルを取得
-            Set rngCtrl = .Range(.Cells(rowS + i - 1, colCtrl), .Cells(rowS + i - 1, colCtrl))
+            Set rngCtrl = .Range(.Cells(rowSt + i - 1, colCtrl), .Cells(rowSt + i - 1, colCtrl))
             
             'checkBoxの値と連動させるセルを取得
-            Set rngVal = .Range(.Cells(rowS + i - 1, colVal), .Cells(rowS + i - 1, colVal))
+            Set rngVal = .Range(.Cells(rowSt + i - 1, colVal), .Cells(rowSt + i - 1, colVal))
             
             With .OLEObjects.Add(ClassType:="Forms.CheckBox.1")
                 '下の1行を使ってオブジェクトの名前を設定すると、この関数を実行後、他の処理が動かなくなる。
