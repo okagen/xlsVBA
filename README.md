@@ -1,11 +1,13 @@
 excel_vba
 =========
+Using VBA to customize a Excel file so that it can be used as DB.
 excelをDBとして利用できるように、vbaを使ってカスタマイズ
 
 
 サンプルクラス : sampletool.cls
 ----------
 Excelのシート上にコントロールを配置して、それらから共通モジュールを呼び出す形でサンプルを作っています。
+
 
 ***
 
