@@ -6,7 +6,7 @@ excelをDBとして利用できるように、vbaを使ってカスタマイズ
 
 サンプルクラス : sampletool.cls
 ----------
-The sample is made by placing the control on the Excel sheet and calling the common module from them.  
+The sample is made by placing some controls on the Excel sheet and calling some common modules from them.  
 Excelのシート上にコントロールを配置して、それらから共通モジュールを呼び出す形でサンプルを作っています。
 
 
@@ -14,6 +14,7 @@ Excelのシート上にコントロールを配置して、それらから共通
 
 グローバル変数、定数設定モジュール : g_list.bas
 ----------
+Module to initialize some global variables and constants. This module is called when the `Private Sub Workbook_Open ()` event in ThisWorkbook occurred.  
 グローバル変数、定数をイニシャライズするモジュールを作っています。このモジュールはThisWorkbook内の`Private Sub Workbook_Open()`イベントが発生した際に呼び出してます。
 
 サンプルモジュール : sample.bas
