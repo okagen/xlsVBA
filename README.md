@@ -25,6 +25,7 @@ Sample macro using a class. The result is rough now, I will revise it properly w
 
 テスト用モジュール : verify.bas
 ----------
+Function test module. For example,  a test function as `verify_clSheet_getAllDataAsArray ()` will be created for testing a method `getAllDataAsArray (***) As Boolean` in the clSheet class.  
 これから作成する関数のテスト用モジュール。例えば`clSheet`クラスの`getAllDataAsArray(***) As Boolean`というメソッドをテストする場合、`verify_clSheet_getAllDataAsArray()`というテスト用の関数を作っています。
 
 ***
