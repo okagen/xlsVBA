@@ -32,8 +32,6 @@ Function test module. For example,  a test function as `verify_clSheet_getAllDat
 
 ActiveXコントロール操作クラス : clAxCtrl.cls
 ----------
-  * Place multiple ActiveX control checkBoxes in the specified column. At that time, the value of checkBox is linked to the value of the destination cell. 
-----------
   * ActiveXコントロールのcheckBoxを指定列に複数配置する。その際checkBoxの値と、配置先のセルの値とリンクさせた状態にする。`putChkBoxesV(***) As Boolean`
 
 Array処理クラス : clDatArr.cls
