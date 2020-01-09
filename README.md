@@ -19,7 +19,7 @@ Module to initialize some global variables and constants. This module is called 
 
 サンプルモジュール : sample.bas
 ----------
-Sample macro using a class. The result is rough now, I will revise it properly when I need it.  
+Sample macro using a class. It's still rough, I will revise it properly when I need it.  
 クラスを使って、サンプルマクロを組んでみます。出来は荒いですが、ちゃんと作るときにちゃんとします。  
   * パーツマスターシートを生成。`createPartsMasterSheet`
 
