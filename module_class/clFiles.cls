@@ -11,7 +11,7 @@ Option Explicit
 Option Base 1
 
 '=============================
-'
+' Export some specified modules into the specified directory.
 ' 指定されたモジュールを指定したディレクトリへエクスポートする。
 '  [i]wb                   エクスポート元のExcelブックオブジェクト
 '  [i]tgtModules       エクスポート対象のモジュール名の配列
@@ -60,10 +60,40 @@ Public Function exportModules( _
     exportModules = bRet
 End Function
 
+'=============================
+' Get the full path of all Excel files under the specified directory.
+' 指定したディレクトリ配下にある全Excelファイルのフルパス取得
+'  [i]path      検索するディレクトリのパス
+'  [o]ret       Excelのフルパスを蓄積したCollection
+'--------------------------------------------------
+Public Function getAllXlsFilePathCol(ByVal Path As String, _
+                                    ByRef ret As Collection) As Boolean
+    Dim FSO As Object
+    Dim folder As Variant
+    Dim file As Variant
+    
+    Set FSO = CreateObject("Scripting.FileSystemObject")
+    For Each folder In FSO.getFolder(Path).SubFolders
+        Call getAllXlsFilePathCol(folder.Path, ret)
+    Next folder
+    For Each file In FSO.getFolder(Path).files
+        If InStr(file.Type, "Excel") > 0 Then
+            ret.Add (file.Path)
+        End If
+    Next file
+    Set FSO = Nothing
+    
+    If ret.count < 1 Then
+        getAllXlsFilePathCol = False
+    Else
+        getAllXlsFilePathCol = True
+    End If
+End Function
 
 '=============================
-'指定されたシート、モジュールを、新しいブックの中にコピーし保存する。
-'マクロが含まれる場合xlsmで保存する。
+' Copy some specified sheets and modules from one excel book into another.
+' 指定されたシート、モジュールを、新しいブックの中にコピーする。
+' マクロが含まれる場合xlsmで保存する。
 '  [i]wbFrom             コピー元のExcelブックオブジェクト
 '  [i]wbTo                  コピー先のExcelブックオブジェクト
 '  [i]tgtSheets           コピー対象のシート名の配列
@@ -71,7 +101,7 @@ End Function
 '  [i]tgtClsModules           コピー対象のクラスモジュール名の配列
 '  関数の返り値：一つ以上コピーに成功したらTrue
 '--------------------------------------------------
-Public Function copySheetsAndModulesIntoNewFileThenSave( _
+Public Function copySheetsAndModules( _
                                         ByVal wbFrom As Workbook, _
                                         ByVal wbTo As Workbook, _
                                         ByVal tgtSheets As Variant, _
@@ -90,7 +120,8 @@ End Function
 
 
 '=============================
-'指定されたモジュールを、別のブックの中にコピーする。
+' Copy some specified modules from one excel book into another.
+' 指定されたモジュールを、別のブックの中にコピーする。
 '  [i]wbFrom                コピー元のExcelブックオブジェクト
 '  [i]tgtModules           コピー対象のモジュール名の配列
 '  [i]wbTo                   コピー先のExcelブックオブジェクト
@@ -137,6 +168,7 @@ Public Function copyModules(ByVal wbFrom As Workbook, _
 End Function
 
 '=============================
+' Copy some specified sheets from one book into another book.
 ' ブック内の指定されたシートを、別のブックの中にコピーする。
 '  [i]wbFrom                コピー元のExcelブックオブジェクト
 '  [i]tgtSheets             コピー対象のシート名の配列
@@ -357,35 +389,6 @@ Public Function getFolderAndFileName(ByVal fullPath As String, _
     
     Set FSO = Nothing
     getFolderAndFileName = True
-End Function
-
-'=============================
-'指定したディレクトリ配下にある全Excelファイルのフルパス取得
-'  [i]path      検索するディレクトリのパス
-'  [o]ret       Excelのフルパスを蓄積したCollection
-'--------------------------------------------------
-Public Function getAllXlsFilePathCol(ByVal Path As String, _
-                                    ByRef ret As Collection) As Boolean
-    Dim FSO As Object
-    Dim folder As Variant
-    Dim file As Variant
-    
-    Set FSO = CreateObject("Scripting.FileSystemObject")
-    For Each folder In FSO.getFolder(Path).SubFolders
-        Call getAllXlsFilePathCol(folder.Path, ret)
-    Next folder
-    For Each file In FSO.getFolder(Path).files
-        If InStr(file.Type, "Excel") > 0 Then
-            ret.Add (file.Path)
-        End If
-    Next file
-    Set FSO = Nothing
-    
-    If ret.count < 1 Then
-        getAllXlsFilePathCol = False
-    Else
-        getAllXlsFilePathCol = True
-    End If
 End Function
 
 '=============================

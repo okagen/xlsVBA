@@ -31,6 +31,36 @@ Sub verify_clFiles_exportModules()
 
 End Sub
 
+'==================================================
+Sub verify_clFiles_getAllXlsFilePathCol()
+    Dim bRet As Boolean
+    
+    'ダミーのシートを持つ、ダミーのファイルを作成。
+    Dim dummySheets As Variant
+    Dim dummyWb As Workbook
+    dummySheets = Array("$verify")
+    bRet = verify_clFiles_makeDummyExcelFileWithDummySheets(dummySheets, dummyWb)
+    
+    Dim dat As New Collection
+    Dim FLS As New clFiles
+    Dim i As Long
+    
+    bRet = FLS.getAllXlsFilePathCol(ThisWorkbook.Path, dat)
+    
+    If bRet = True Then
+        'plot all data on the $verify sheet
+        With dummyWb.sheets("$verify")
+            .Select
+            For i = 1 To dat.count
+                .Range(Cells(i, 1), Cells(i, 1)).Value = dat(i)
+            Next
+            
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+End Sub
 
 '==================================================
 Sub verify_clFiles_copySheetsAndModulesIntoNewFileThenSave()

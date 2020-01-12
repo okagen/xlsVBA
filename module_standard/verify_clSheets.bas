@@ -5,7 +5,7 @@ Option Base 1
 '==================================================
 Sub verify_clSheets_deleteUnSpecifiedSheets()
 
-    'ダミーのシートを持つ、ダミー①のファイルを作成。
+    'ダミーのシートを持つ、ダミーのファイルを作成。
     Dim dummySheets As Variant
     Dim dummyWb As Workbook
     Dim bRet As Boolean

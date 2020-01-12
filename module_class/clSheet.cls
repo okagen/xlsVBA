@@ -10,9 +10,11 @@ Attribute VB_Exposed = False
 Option Explicit
 Option Base 1
 
+
+
 '==================================================
-'名前を指定してSheetを作成。
-'同名のシートが存在した場合その中身を削除する。
+' Create a new sheet by specified name. Clear all data
+' 名前を指定してSheetを作成。 同名のシートが存在した場合その中身を削除する。
 '  [i]wb        対象のWorkbook
 '  [i]shName    作成するシート名
 '--------------------------------------------------
