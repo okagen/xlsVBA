@@ -9,7 +9,7 @@
 
 1. Copy some specified sheets and modules from one excel book into another. / 指定されたシート、モジュールを、新しいブックの中にコピーする。`copySheetsAndModules`
 
-1. Copy some specified modules from one excel book into another. / 指定されたモジュールを別のブックの中にコピーする。`copyModules(***) As Boolean`
+1. Copy some specified modules from one excel book into another. / 指定されたモジュールを別のブックの中にコピーする。`copyModules`
 
 1. Copy some specified sheets from one excel book into another. / Excelファイル内の指定されたシートを別のExcelファイルコピーする。`copySheets`
 
