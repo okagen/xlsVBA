@@ -12,8 +12,9 @@ Option Base 1
 
 
 '==================================================
+' Delete sheets except specified.
 ' 指定したシート以外のシートを削除する
-'  [i]wb                対象のWorkbook
+'  [i]wb                    対象のWorkbook
 '  [i]remainSheets     残すシート名の配列
 '--------------------------------------------------
 Public Function deleteUnSpecifiedSheets(ByVal wb As Workbook, _

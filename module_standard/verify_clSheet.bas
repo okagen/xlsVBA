@@ -11,8 +11,7 @@ Sub verify_clSheet_initSheet()
     Dim wb As Workbook
     
     '=======================
-    'The Sheet name for test
-    name = "sample5"
+    name = "SampleSheetForTest"
     Set wb = ThisWorkbook
     '=======================
     
@@ -20,6 +19,30 @@ Sub verify_clSheet_initSheet()
     
     If bRet Then
         Debug.Print "result ::: initSheet done-->" & name & " |" & Now
+    Else
+        Debug.Print "result ::: err-->" & name & " |" & Now
+    End If
+    
+End Sub
+
+'==================================================
+Sub verify_clSheet_newSheet()
+    Dim name As String, name1 As String, name2 As String, name3 As String
+    Dim sh As New clSheet
+    Dim bRet1 As Boolean, bRet2 As Boolean, bRet3 As Boolean
+    Dim wb As Workbook
+    
+    '=======================
+    name = "SampleSheetForTest"
+    Set wb = ThisWorkbook
+    '=======================
+    
+    bRet1 = sh.newSheet(wb, name, name1)
+    bRet2 = sh.newSheet(wb, name, name2)
+    bRet3 = sh.newSheet(wb, name, name3)
+    
+    If bRet1 And bRet2 And bRet3 Then
+        Debug.Print "result ::: newSheet done-->" & CStr(name1) & " and " & CStr(name2) & " and " & CStr(name3) & " |" & Now
     Else
         Debug.Print "result ::: err-->" & name & " |" & Now
     End If

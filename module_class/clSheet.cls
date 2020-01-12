@@ -11,45 +11,39 @@ Option Explicit
 Option Base 1
 
 
-
 '==================================================
-' Create a new sheet by specified name. Clear all data
+' Create several sheets by specifying their names. If a sheet with the same name exists, delete its contents.
 ' 名前を指定してSheetを作成。 同名のシートが存在した場合その中身を削除する。
 '  [i]wb        対象のWorkbook
 '  [i]shName    作成するシート名
 '--------------------------------------------------
 Public Function initSheet(ByVal wb As Workbook, _
-                            ByVal shName As String) As Boolean
+                                        ByVal shName As String) As Boolean
                             
     If Not existSheet(wb, shName) Then
         wb.Worksheets.Add After:=wb.Worksheets(wb.Worksheets.count)
         ActiveSheet.name = shName
     Else
         With wb.sheets(shName)
-            Dim verLastRow As Long
-            Dim delRow As String
-            verLastRow = .UsedRange.Cells(.UsedRange.count).row + 1
-            delRow = "1:" & verLastRow
-            '行削除
-            .Range(delRow).Delete
-            'すべてのコントロールを削除
+            .Cells.Clear
             .DrawingObjects.Delete
         End With
     End If
-
+    initSheet = True
 End Function
 
 '==================================================
-'名前を指定してSheetを作成。
-'同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
+' Create several sheets by specifying their names.
+' If a sheet with the same name exists, add (#) to the end of the sheet name and count up the number.
+' 名前を指定してSheetを作成。 同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
 '  [i]wb        対象のWorkbook
 '  [i]shName    作成するシート名
 '  [o]newSheet  作成された新しいシートの名前
 '--------------------------------------------------
 Public Function newSheet(ByVal wb As Workbook, _
-                            ByVal shName As String, _
-                            ByRef newSheetName As String _
-                            ) As Boolean
+                                        ByVal shName As String, _
+                                        ByRef newSheetName As String _
+                                        ) As Boolean
 
     Dim xlsheet As Worksheet
     Dim num As Integer
@@ -76,9 +70,12 @@ Public Function newSheet(ByVal wb As Workbook, _
 End Function
 
 '==================================================
-'名前を指定してModuleの有無をチェック
+' Check Module existence by specifying the name.
+' 名前を指定してModuleの有無をチェック
 '  [i]wb                対象のWorkbook
 '  [i]tgtModule     確認するモジュール名
+' Return : True : the specified module exists
+' 関数の返り値：指定したモジュールが存在した場合True
 '--------------------------------------------------
 Public Function existModule(ByVal wb As Workbook, _
                                         ByVal moduleName As String _
@@ -96,9 +93,12 @@ Public Function existModule(ByVal wb As Workbook, _
 End Function
 
 '==================================================
-'名前を指定してSheetの有無をチェック
+' Check Module existence by specifying the name.
+' 名前を指定してSheetの有無をチェック
 '  [i]wb        対象のWorkbook
 '  [i]shName    確認するシート名
+' Return : True : the specified sheet exists
+' 関数の返り値：指定したシートが存在した場合True
 '--------------------------------------------------
 Public Function existSheet(ByVal wb As Workbook, _
                             ByVal shName As String) As Boolean
@@ -115,10 +115,13 @@ Public Function existSheet(ByVal wb As Workbook, _
 End Function
 
 '==================================================
-'名前を指定(ワイルドカード可)してSheetの有無をチェック
+' Check Module existence by specifying the name with wild-card character.
+' 名前を指定(ワイルドカード可)してSheetの有無をチェック
 '  [i]wb        対象のWorkbook
 '  [i]shName    確認するシート名 ワイルドカード可
 '  [o]shNames   一致するシートの名前の配列
+' Return : True : the specified sheet exists
+' 関数の返り値：指定したシートが存在した場合True
 '--------------------------------------------------
 Public Function existSheetWithWildCardCharacter(ByVal wb As Workbook, _
                                      ByVal shName As String, _

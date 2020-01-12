@@ -16,7 +16,8 @@ Option Base 1
 '  [i]wb                   エクスポート元のExcelブックオブジェクト
 '  [i]tgtModules       エクスポート対象のモジュール名の配列
 '  [i]toPath             エクスポート先のExcelブックオブジェクト
-'  関数の返り値：一つ以上エクスポートに成功したらTrue
+' Return : True : one or more were successfully exported
+' 関数の返り値：一つ以上エクスポートに成功したらTrue
 '--------------------------------------------------
 Public Function exportModules( _
                                         ByVal wb As Workbook, _
@@ -65,6 +66,8 @@ End Function
 ' 指定したディレクトリ配下にある全Excelファイルのフルパス取得
 '  [i]path      検索するディレクトリのパス
 '  [o]ret       Excelのフルパスを蓄積したCollection
+' Return : True : one or more file paths were successfully collected.
+' 関数の返り値：一つ以上コピーに成功したらTrue
 '--------------------------------------------------
 Public Function getAllXlsFilePathCol(ByVal Path As String, _
                                     ByRef ret As Collection) As Boolean
@@ -99,7 +102,8 @@ End Function
 '  [i]tgtSheets           コピー対象のシート名の配列
 '  [i]tgtStdModules           コピー対象の標準モジュール名の配列
 '  [i]tgtClsModules           コピー対象のクラスモジュール名の配列
-'  関数の返り値：一つ以上コピーに成功したらTrue
+' Return : True : one or more were successfully copied
+' 関数の返り値：True : 一つ以上コピーに成功した
 '--------------------------------------------------
 Public Function copySheetsAndModules( _
                                         ByVal wbFrom As Workbook, _
@@ -126,7 +130,8 @@ End Function
 '  [i]tgtModules           コピー対象のモジュール名の配列
 '  [i]wbTo                   コピー先のExcelブックオブジェクト
 '  [o]copiedModules      コピーが成功したモジュール名前群
-'  関数の返り値：一つ以上コピーに成功したらTrue
+' Return : True : one or more were successfully copied
+' 関数の返り値：一つ以上コピーに成功したらTrue
 '--------------------------------------------------
 Public Function copyModules(ByVal wbFrom As Workbook, _
                                             ByVal tgtModules As Variant, _
@@ -174,7 +179,8 @@ End Function
 '  [i]tgtSheets             コピー対象のシート名の配列
 '  [i]wbTo                   コピー先のExcelブックオブジェクト
 '  [o]copiedSheets      コピーが成功したシートの名前群
-'  関数の返り値：一つ以上コピーに成功したらTrue
+' Return : True : one or more were successfully copied
+' 関数の返り値：一つ以上コピーに成功したらTrue
 '--------------------------------------------------
 Public Function copySheets(ByVal wbFrom As Workbook, _
                                                 ByVal tgtSheets As Variant, _
