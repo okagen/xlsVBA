@@ -8,9 +8,137 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
-Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
-
 Option Base 1
+
+'==================================================
+'名前を指定してSheetを作成。
+'同名のシートが存在した場合その中身を削除する。
+'  [i]wb        対象のWorkbook
+'  [i]shName    作成するシート名
+'--------------------------------------------------
+Public Function initSheet(ByVal wb As Workbook, _
+                            ByVal shName As String) As Boolean
+                            
+    If Not existSheet(wb, shName) Then
+        wb.Worksheets.Add After:=wb.Worksheets(wb.Worksheets.count)
+        ActiveSheet.name = shName
+    Else
+        With wb.Sheets(shName)
+            Dim verLastRow As Long
+            Dim delRow As String
+            verLastRow = .UsedRange.Cells(.UsedRange.count).row + 1
+            delRow = "1:" & verLastRow
+            '行削除
+            .Range(delRow).Delete
+            'すべてのコントロールを削除
+            .DrawingObjects.Delete
+        End With
+    End If
+
+End Function
+
+'==================================================
+'名前を指定してSheetを作成。
+'同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
+'  [i]wb        対象のWorkbook
+'  [i]shName    作成するシート名
+'  [o]newSheet  作成された新しいシートの名前
+'--------------------------------------------------
+Public Function newSheet(ByVal wb As Workbook, _
+                            ByVal shName As String, _
+                            ByRef newSheetName As String _
+                            ) As Boolean
+
+    Dim xlsheet As Worksheet
+    Dim num As Integer
+    Dim flg As Boolean
+    Dim newName As String
+    
+    newName = shName
+    num = 1
+    flg = True
+    Do While flg
+        If Not existSheet(wb, newName) Then
+            flg = False
+        Else
+            newName = shName & " " & Format(num, "(#)")
+            num = num + 1
+        End If
+    Loop
+    
+    wb.Worksheets.Add After:=wb.Worksheets(Worksheets.count)
+    ActiveSheet.name = newName
+    newSheetName = newName
+    newSheet = True
+    
+End Function
+
+'==================================================
+'名前を指定してModuleの有無をチェック
+'  [i]wb                対象のWorkbook
+'  [i]tgtModule     確認するモジュール名
+'--------------------------------------------------
+Public Function existModule(ByVal wb As Workbook, _
+                                        ByVal moduleName As String _
+                                        ) As Boolean
+    Dim xlsModule As Object
+    On Error Resume Next
+    Set xlsModule = wb.VBProject.VBComponents(moduleName)
+    On Error GoTo 0
+    If xlsModule Is Nothing Then
+        existModule = False
+    Else
+        existModule = True
+    End If
+    Set xlsModule = Nothing
+End Function
+
+'==================================================
+'名前を指定してSheetの有無をチェック
+'  [i]wb        対象のWorkbook
+'  [i]shName    確認するシート名
+'--------------------------------------------------
+Public Function existSheet(ByVal wb As Workbook, _
+                            ByVal shName As String) As Boolean
+    Dim xlsheet As Worksheet
+    On Error Resume Next
+    Set xlsheet = wb.Worksheets(shName)
+    On Error GoTo 0
+    If xlsheet Is Nothing Then
+        existSheet = False
+    Else
+        existSheet = True
+    End If
+    Set xlsheet = Nothing
+End Function
+
+'==================================================
+'名前を指定(ワイルドカード可)してSheetの有無をチェック
+'  [i]wb        対象のWorkbook
+'  [i]shName    確認するシート名 ワイルドカード可
+'  [o]shNames   一致するシートの名前の配列
+'--------------------------------------------------
+Public Function existSheetWithWildCardCharacter(ByVal wb As Workbook, _
+                                     ByVal shName As String, _
+                                     ByRef shNames As Collection) As Boolean
+    On Error Resume Next
+    Dim ret As Boolean
+    ret = False
+    Dim ws As Worksheet
+    For Each ws In wb.Worksheets
+        If ws.name Like shName Then
+            shNames.Add (ws.name)
+            ret = True
+        End If
+    Next
+    existSheetWithWildCardCharacter = ret
+End Function
+
+
+
+
+'---------------------------------------------
+' ↓見直し中
 
 '==================================================
 '列αに設定されたIDと関連するIDが列βに存在した場合、列βの値を使って列αを検索し、レコードを取得する。
@@ -207,7 +335,7 @@ Public Function setDataByVlookup(ByVal main_wb As Workbook, _
     
     With main_wb.Worksheets(main_shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
         
         For i = main_dataRow To lastRow Step 1
             '関数設定セルを取得
@@ -255,7 +383,7 @@ Public Function setFilter(ByVal wb As Workbook, _
     
     With wb.Worksheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
         '最終行までのデータRangeを取得
         Set datRng = .Range(.Cells(datRowS - 1, datColS), .Cells(lastRow, datColE))
         'フィルター設定を解除
@@ -263,7 +391,7 @@ Public Function setFilter(ByVal wb As Workbook, _
         'ハッシュテーブルのキーの配列を取得
         fieldKeyArr = tgtFields.keys
         'フィルター設定
-        For i = 0 To tgtFields.Count - 1
+        For i = 0 To tgtFields.count - 1
             datRng.AutoFilter field:=fieldKeyArr(i), Criteria1:=tgtFields(fieldKeyArr(i))
         Next i
     End With
@@ -307,7 +435,7 @@ Public Function getRowDataVLookUp(ByVal wb As Workbook, _
     
     With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
         '最終行までの1列分のデータを取得
         Set rngCol = .Range(.Cells(datRowS, col), .Cells(lastRow, col))
         '検索する
@@ -369,7 +497,7 @@ Public Function deleteColData(ByVal wb As Workbook, _
     Dim recNum As Long
     With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
         'データ削除
         .Range(.Cells(datRowS, col), .Cells(lastRow, col)).Clear
     End With
@@ -398,7 +526,7 @@ Public Function getLastRow(ByVal wb As Workbook, _
     Dim recNum As Long
     With wb.Sheets(shName)
         '最終行取得
-        lastRow = .Range(.Cells(Rows.Count, col), .Cells(Rows.Count, col)).End(xlUp).row
+        lastRow = .Range(.Cells(rowS.count, col), .Cells(rowS.count, col)).End(xlUp).row
     End With
     
     If lastRow > datRowS Then
@@ -433,7 +561,7 @@ Public Function getColDataAsArray(ByVal wb As Workbook, _
     Dim recNum As Long
     With wb.Sheets(shName)
         '最終行取得
-        lastRow = .UsedRange.Cells(.UsedRange.Count).row
+        lastRow = .UsedRange.Cells(.UsedRange.count).row
         'データ取得
         ret = .Range(.Cells(datRowS, col), .Cells(lastRow, col)).Value
     End With
@@ -507,7 +635,7 @@ Public Function getDataAsArray(ByVal wb As Workbook, _
     With wb.Sheets(shName)
         '最終行取得
         If datRowE = 0 Then
-            lastRow = .UsedRange.Cells(.UsedRange.Count).row
+            lastRow = .UsedRange.Cells(.UsedRange.count).row
         Else
             lastRow = datRowE
         End If
@@ -524,33 +652,6 @@ Public Function getDataAsArray(ByVal wb As Workbook, _
     Else
         getDataAsArray = False
     End If
-End Function
-
-'==================================================
-'名前を指定してSheetを作成。
-'同名のシートが存在した場合その中身を削除する。
-'  [i]wb        対象のWorkbook
-'  [i]shName    作成するシート名
-'--------------------------------------------------
-Public Function initSheet(ByVal wb As Workbook, _
-                            ByVal shName As String) As Boolean
-                            
-    If Not existSheet(wb, shName) Then
-        wb.Worksheets.Add After:=wb.Worksheets(wb.Worksheets.Count)
-        ActiveSheet.name = shName
-    Else
-        With wb.Sheets(shName)
-            Dim verLastRow As Long
-            Dim delRow As String
-            verLastRow = .UsedRange.Cells(.UsedRange.Count).row + 1
-            delRow = "1:" & verLastRow
-            '行削除
-            .Range(delRow).Delete
-            'すべてのコントロールを削除
-            .DrawingObjects.Delete
-        End With
-    End If
-
 End Function
 
 '==================================================
@@ -584,93 +685,11 @@ Public Function newCopyedSheet(ByVal wb As Workbook, _
         End If
     Loop
     
-    baseSh.Copy After:=wb.Worksheets(Worksheets.Count)
+    baseSh.Copy After:=wb.Worksheets(Worksheets.count)
     ActiveSheet.name = newName
     newSheetName = newName
     newCopyedSheet = True
     
-End Function
-
-
-
-'==================================================
-'名前を指定してSheetを作成。
-'同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
-'  [i]wb        対象のWorkbook
-'  [i]shName    作成するシート名
-'  [o]newSheet  作成された新しいシートの名前
-'--------------------------------------------------
-Public Function newSheet(ByVal wb As Workbook, _
-                            ByVal shName As String, _
-                            ByRef newSheetName As String _
-                            ) As Boolean
-
-    Dim xlsheet As Worksheet
-    Dim num As Integer
-    Dim flg As Boolean
-    Dim newName As String
-    
-    newName = shName
-    num = 1
-    flg = True
-    Do While flg
-        If Not existSheet(wb, newName) Then
-            flg = False
-        Else
-            newName = shName & " " & Format(num, "(#)")
-            num = num + 1
-        End If
-    Loop
-    
-    wb.Worksheets.Add After:=wb.Worksheets(Worksheets.Count)
-    ActiveSheet.name = newName
-    newSheetName = newName
-    newSheet = True
-    
-End Function
-
-'==================================================
-'名前を指定してSheetの有無をチェック
-'  [i]wb        対象のWorkbook
-'  [i]shName    確認するシート名
-'--------------------------------------------------
-Public Function existSheet(ByVal wb As Workbook, _
-                            ByVal shName As String) As Boolean
-    Dim xlsheet As Worksheet
-    On Error Resume Next
-    Set xlsheet = wb.Worksheets(shName)
-    On Error GoTo 0
-    If xlsheet Is Nothing Then
-        existSheet = False
-    Else
-        existSheet = True
-    End If
-    Set xlsheet = Nothing
-End Function
-
-'==================================================
-'名前を指定(ワイルドカード可)してSheetの有無をチェック
-'  [i]wb        対象のWorkbook
-'  [i]shName    確認するシート名 ワイルドカード可
-'  [o]shNames   一致するシートの名前の配列
-'--------------------------------------------------
-Public Function existSheet_ambiguous(ByVal wb As Workbook, _
-                                     ByVal shName As String, _
-                                     ByRef shNames As Collection) As Boolean
-    On Error Resume Next
-    Dim ret As Boolean
-    ret = False
-    
-    Dim ws As Worksheet
-    For Each ws In wb.Worksheets
-        If ws.name Like shName Then
-            shNames.Add (ws.name)
-            ret = True
-        End If
-    Next
-    
-    existSheet_ambiguous = ret
-
 End Function
 
 

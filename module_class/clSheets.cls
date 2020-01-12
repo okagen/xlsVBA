@@ -8,6 +8,33 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+Option Base 1
+
+
+
+
+'==================================================
+' 指定したシート以外のシートを削除する
+'  [i]wb                対象のWorkbook
+'  [i]remainSheets     確認するモジュール名
+'--------------------------------------------------
+Public Function deleteUnSpecifiedSheets(ByVal wb As Workbook, _
+                                                                ByVal remainSheets As Variant) As Boolean
+
+    Dim res As Variant
+    Dim sh As Worksheet
+    For Each sh In wb.Sheets
+        '要素を検索
+        res = Filter(remainSheets, sh.name)
+        '戻り値配列のサイズで要素の有無を判定
+        If UBound(res) = -1 Then
+            sh.Delete
+        End If
+    Next sh
+End Function
+
+'---------------------------------------------
+' ↓見直し中
 
 '==================================================
 'VLOOKUP関数を用いて、複数シートを参照してデータを取得する
@@ -36,7 +63,7 @@ Public Function getDataFromSheetsByVlookup(ByVal wb As Workbook, _
     bRet = sh.colNo2Rng(keyCol, dataCol, rngTxt)
     
     'シートを数分ループ
-    For i = 1 To targetSheets.Count Step 1
+    For i = 1 To targetSheets.count Step 1
         With wb.Worksheets(targetSheets(i))
             On Error Resume Next
             Set rng = .Range(rngTxt)
@@ -89,7 +116,7 @@ Public Function getTargetSheets(ByVal wb As Workbook, _
         End If
     Next
    
-    If targetSheets.Count < 1 Then
+    If targetSheets.count < 1 Then
         getTargetSheets = False
     Else
         getTargetSheets = True

@@ -8,6 +8,191 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
+Option Base 1
+
+'=============================
+'指定されたモジュールを指定したディレクトリへエクスポートする。
+'  [i]wb                   エクスポート元のExcelブックオブジェクト
+'  [i]tgtModules       エクスポート対象のモジュール名の配列
+'  [i]toPath             エクスポート先のExcelブックオブジェクト
+'  [o]copiedModules      エクスポートが成功したモジュール名前群
+'  関数の返り値：一つ以上エクスポートに成功したらTrue
+'--------------------------------------------------
+Public Function exportModules( _
+                                        ByVal wb As Workbook, _
+                                        ByVal tgtModules As Variant, _
+                                        ByVal toPath As String _
+                                        ) As Boolean
+    Dim tgtMo As String, prg As String
+    Dim i As Long
+    Dim sh As New clSheet
+    Dim ext As String
+    Dim bRet As Boolean
+    
+    bRet = False
+    For i = 1 To UBound(tgtModules) Step 1
+        tgtMo = tgtModules(i)
+        If sh.existModule(wb, tgtMo) Then
+        
+            With wb.VBProject.VBComponents(tgtMo)
+                    '指定されたモジュールの拡張子を取得
+                    Select Case .Type
+                    Case vbext_ct_StdModule
+                        ext = "bas"
+                    Case vbext_ct_ClassModule, vbext_ct_Document
+                        ext = "cls"
+                    Case vbext_ct_MSForm
+                        ext = "frm"
+                    End Select
+                    
+                    'Export the module.
+                    Dim objFso As Object
+                    Dim exportFilePath As String
+                    Set objFso = CreateObject("Scripting.FileSystemObject")
+                         exportFilePath = objFso.BuildPath(toPath, tgtMo & "." & ext)
+                    Set objFso = Nothing
+                    .Export exportFilePath
+                    
+                    bRet = True
+            End With
+        End If
+    Next i
+    exportModules = bRet
+End Function
+
+
+'=============================
+'指定されたシート、モジュールを、新しいブックの中にコピーし保存する。
+'マクロが含まれる場合xlsmで保存する。
+'  [i]wb                   コピー元のExcelブックオブジェクト
+'  [i]tgtSheets           コピー対象のシート名の配列
+'  [i]tgtStdModules           コピー対象の標準モジュール名の配列
+'  [i]tgtClsModules           コピー対象のクラスモジュール名の配列
+'  [i]toPath                   コピー先のExcelブックオブジェクト
+'  [i]fileName                ファイル名
+'  [o]wbNew      保存したExcelファイルのオブジェクト
+'  関数の返り値：一つ以上コピーに成功したらTrue
+'--------------------------------------------------
+Public Function copySheetsAndModulesIntoNewFileThenSave( _
+                                        ByVal wb As Workbook, _
+                                        ByVal tgtSheets As Variant, _
+                                        ByVal tgtStdModules As Variant, _
+                                        ByVal tgtClsModules As Variant, _
+                                        ByVal toPath As String, _
+                                        ByVal fileName As String, _
+                                        ByRef wbNew As Workbook _
+                                        ) As Boolean
+    Workbooks.Add
+    Set wbNew = Application.ActiveWorkbook
+    
+    Dim bRet1 As Boolean, bRet2 As Boolean, bRet3 As Boolean
+    Dim copiedSheets As New Collection, copiedModules As New Collection
+    bRet1 = copySheets(wb, tgtSheets, wbNew, copiedSheets)
+    bRet2 = copyModules(wb, tgtStdModeles, vbext_ct_StdModule, wbNew, copiedModules)
+    bRet3 = copyModules(wb, tgtClsModeles, vbext_ct_ClassModule, wbNew, copiedModules)
+
+    'Save the new book as ...
+    Dim objFso As Object
+    Dim newWbPath As String
+    Set objFso = CreateObject("Scripting.FileSystemObject")
+         newWbPath = objFso.BuildPath(toPath, fileName)
+    Set objFso = Nothing
+    
+    On Error Resume Next
+    If bRet2 = False And bRet3 = False Then
+        Call wbNew.SaveAs(fileName:=newWbPath, FileFormat:=xlOpenXMLWorkbook)
+    Else
+        Call wbNew.SaveAs(fileName:=newWbPath, FileFormat:=xlOpenXMLWorkbookMacroEnabled)
+    End If
+    On Error GoTo 0
+    
+    copySheetsAndModulesIntoNewFileThenSave = bRet1 Or bRet2 Or bRet3
+End Function
+
+
+'=============================
+'指定されたモジュールを、別のブックの中にコピーする。
+'  [i]wbFrom                コピー元のExcelブックオブジェクト
+'  [i]tgtModules           コピー対象のモジュール名の配列
+'  [i]wbTo                   コピー先のExcelブックオブジェクト
+'  [o]copiedModules      コピーが成功したモジュール名前群
+'  関数の返り値：一つ以上コピーに成功したらTrue
+'--------------------------------------------------
+Public Function copyModules(ByVal wbFrom As Workbook, _
+                                            ByVal tgtModules As Variant, _
+                                            ByVal cmpKind As Integer, _
+                                            ByRef wbTo As Workbook, _
+                                            ByRef copiedModules As Collection _
+                                           ) As Boolean
+    Dim tgtMo As String, prg As String
+    Dim i As Long
+    Dim sh As New clSheet
+    Dim cntLines As Long
+    
+    For i = 1 To UBound(tgtModules) Step 1
+        tgtMo = tgtModules(i)
+        If sh.existModule(wbFrom, tgtMo) Then
+            With wbFrom.VBProject.VBComponents(tgtMo).CodeModule
+                prg = .Lines(1, .CountOfLines)
+            End With
+            
+            With wbTo.VBProject.VBComponents.Add(cmpKind)
+                '「変数の宣言を強制する」オプションが有効の場合、Option Explicitの行が自動的にできるため、あったら削除。
+                cntLines = .CodeModule.CountOfLines
+                If cntLines > 0 Then
+                    .CodeModule.DeleteLines 1, cntLines
+                End If
+                .CodeModule.AddFromString prg
+                .name = tgtMo
+            End With
+            copiedModules.Add (tgtMo)
+        End If
+    Next i
+
+    If copiedModules.count > 0 Then
+        copyModules = True
+    Else
+        copyModules = False
+    End If
+
+End Function
+
+'=============================
+' ブック内の指定されたシートを、別のブックの中にコピーする。
+'  [i]wbFrom                コピー元のExcelブックオブジェクト
+'  [i]tgtSheets             コピー対象のシート名の配列
+'  [i]wbTo                   コピー先のExcelブックオブジェクト
+'  [o]copiedSheets      コピーが成功したシートの名前群
+'  関数の返り値：一つ以上コピーに成功したらTrue
+'--------------------------------------------------
+Public Function copySheets(ByVal wbFrom As Workbook, _
+                                                ByVal tgtSheets As Variant, _
+                                                ByVal wbTo As Workbook, _
+                                                ByRef copiedSheets As Collection _
+                                                ) As Boolean
+    Dim i As Long
+    Dim tgtSh As String
+    Dim sh As clSheet
+    Set sh = New clSheet
+    
+    For i = 1 To UBound(tgtSheets) Step 1
+        tgtSh = tgtSheets(i)
+        If sh.existSheet(wbFrom, tgtSh) Then
+            wbFrom.Sheets(tgtSh).Copy After:=wbTo.Sheets(wbTo.Sheets.count)
+            copiedSheets.Add (tgtSh)
+        End If
+    Next i
+    
+    If copiedSheets.count > 0 Then
+        copySheets = True
+    Else
+        copySheets = False
+    End If
+End Function
+
+
+'----------------------------------------------------------------------------------
+'↓↓↓↓ 見直し中
 
 '=============================
 '指定フォルダ内のファイルを、別のフォルダに新しいファイル名でコピーする。
@@ -99,7 +284,7 @@ Public Function getFolderAndFileNameColl(ByVal fullPaths As Collection, _
                                                                 ByRef folders As Collection, _
                                                                 ByRef filenames As Collection _
                                                                 ) As Boolean
-    If fullPaths.Count < 1 Then
+    If fullPaths.count < 1 Then
         getFolderAndFileNameColl = False
         Exit Function
     End If
@@ -138,13 +323,13 @@ Public Function getFolderAndFileNameArr(ByVal fullPaths As Collection, _
     Dim i As Long
     Dim bRet As Boolean
     
-    If fullPaths.Count < 1 Then
+    If fullPaths.count < 1 Then
         getFolderAndFileNameArr = False
         Exit Function
     End If
     
-    ReDim retTmp(1 To fullPaths.Count, 1 To 2)
-    For i = 1 To fullPaths.Count Step 1
+    ReDim retTmp(1 To fullPaths.count, 1 To 2)
+    For i = 1 To fullPaths.count Step 1
         fullPath = fullPaths(i)
         bRet = getFolderAndFileName(fullPath, True, folder, file)
         If bRet Then
@@ -200,24 +385,24 @@ End Function
 '  [i]path      検索するディレクトリのパス
 '  [o]ret       Excelのフルパスを蓄積したCollection
 '--------------------------------------------------
-Public Function getAllXlsFilePathCol(ByVal path As String, _
+Public Function getAllXlsFilePathCol(ByVal Path As String, _
                                     ByRef ret As Collection) As Boolean
     Dim FSO As Object
     Dim folder As Variant
     Dim file As Variant
     
     Set FSO = CreateObject("Scripting.FileSystemObject")
-    For Each folder In FSO.getFolder(path).SubFolders
-        Call getAllXlsFilePathCol(folder.path, ret)
+    For Each folder In FSO.getFolder(Path).SubFolders
+        Call getAllXlsFilePathCol(folder.Path, ret)
     Next folder
-    For Each file In FSO.getFolder(path).files
+    For Each file In FSO.getFolder(Path).files
         If InStr(file.Type, "Excel") > 0 Then
-            ret.Add (file.path)
+            ret.Add (file.Path)
         End If
     Next file
     Set FSO = Nothing
     
-    If ret.Count < 1 Then
+    If ret.count < 1 Then
         getAllXlsFilePathCol = False
     Else
         getAllXlsFilePathCol = True
@@ -234,22 +419,22 @@ Public Function getAllFileNameCol(ByVal ext As String, _
     Dim folder As Variant
     Dim file As Variant
     
-    Dim path As String
-    path = ThisWorkbook.path
+    Dim Path As String
+    Path = ThisWorkbook.Path
     
     
     Set FSO = CreateObject("Scripting.FileSystemObject")
-    For Each folder In FSO.getFolder(path).SubFolders
-        Call getAllXlsFilePathCol(folder.path, ret)
+    For Each folder In FSO.getFolder(Path).SubFolders
+        Call getAllXlsFilePathCol(folder.Path, ret)
     Next folder
-    For Each file In FSO.getFolder(path).files
+    For Each file In FSO.getFolder(Path).files
         If InStr(1, file.name, ext, vbTextCompare) > 0 Then
             ret.Add (file.name)
         End If
     Next file
     Set FSO = Nothing
     
-    If ret.Count < 1 Then
+    If ret.count < 1 Then
         getAllFileNameCol = False
     Else
         getAllFileNameCol = True
