@@ -1,3 +1,26 @@
+
+
+ファイル処理クラス : clFiles.cls
+=========
+
+1. Export some specified modules into the specified directory. / 指定されたモジュールを指定したディレクトリへエクスポートする。`exportModules(***) As Boolean`
+
+1. Get the full path of all Excel files under the specified directory / 指定したディレクトリ配下にある全Excelファイルのフルパス取得 `getAllXlsFilePathCol(***) As Boolean`
+
+1. Copy some specified sheets and modules from one excel book into another. / 指定されたシート、モジュールを、新しいブックの中にコピーする。`copySheetsAndModules(***) As Boolean`
+
+1. Copy some specified modules from one excel book into another. / 指定されたモジュールを別のブックの中にコピーする。`copyModules(***) As Boolean`
+
+1. Copy some specified sheets from one excel book into another. / Excelファイル内の指定されたシートを別のExcelファイルコピーする。`copySheets(***) As Boolean`
+
+シート処理クラス : clSheet.cls
+=========
+
+
+ 
+
+# 過去に作成した下記関数群を現在見直し中。
+
 excel_vba
 =========
 Using VBA to customize a Excel file so that it can be used as DB.  
