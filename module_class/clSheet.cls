@@ -23,7 +23,7 @@ Public Function initSheet(ByVal wb As Workbook, _
         wb.Worksheets.Add After:=wb.Worksheets(wb.Worksheets.count)
         ActiveSheet.name = shName
     Else
-        With wb.Sheets(shName)
+        With wb.sheets(shName)
             Dim verLastRow As Long
             Dim delRow As String
             verLastRow = .UsedRange.Cells(.UsedRange.count).row + 1
@@ -433,7 +433,7 @@ Public Function getRowDataVLookUp(ByVal wb As Workbook, _
     Dim lastIndex As Long
     Dim bRet As Boolean
     
-    With wb.Sheets(shName)
+    With wb.sheets(shName)
         '最終行取得
         lastRow = .UsedRange.Cells(.UsedRange.count).row
         '最終行までの1列分のデータを取得
@@ -495,7 +495,7 @@ Public Function deleteColData(ByVal wb As Workbook, _
     Dim lastRow As Long
     Dim ret As Variant
     Dim recNum As Long
-    With wb.Sheets(shName)
+    With wb.sheets(shName)
         '最終行取得
         lastRow = .UsedRange.Cells(.UsedRange.count).row
         'データ削除
@@ -524,7 +524,7 @@ Public Function getLastRow(ByVal wb As Workbook, _
     Dim lastRow As Long
     Dim ret As Variant
     Dim recNum As Long
-    With wb.Sheets(shName)
+    With wb.sheets(shName)
         '最終行取得
         lastRow = .Range(.Cells(rowS.count, col), .Cells(rowS.count, col)).End(xlUp).row
     End With
@@ -559,7 +559,7 @@ Public Function getColDataAsArray(ByVal wb As Workbook, _
     Dim lastRow As Long
     Dim ret As Variant
     Dim recNum As Long
-    With wb.Sheets(shName)
+    With wb.sheets(shName)
         '最終行取得
         lastRow = .UsedRange.Cells(.UsedRange.count).row
         'データ取得
@@ -632,7 +632,7 @@ Public Function getDataAsArray(ByVal wb As Workbook, _
                                     ByRef col As Long) As Boolean
     Dim lastRow As Long
     Dim ret As Variant
-    With wb.Sheets(shName)
+    With wb.sheets(shName)
         '最終行取得
         If datRowE = 0 Then
             lastRow = .UsedRange.Cells(.UsedRange.count).row

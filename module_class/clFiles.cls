@@ -64,47 +64,26 @@ End Function
 '=============================
 '指定されたシート、モジュールを、新しいブックの中にコピーし保存する。
 'マクロが含まれる場合xlsmで保存する。
-'  [i]wb                   コピー元のExcelブックオブジェクト
+'  [i]wbFrom             コピー元のExcelブックオブジェクト
+'  [i]wbTo                  コピー先のExcelブックオブジェクト
 '  [i]tgtSheets           コピー対象のシート名の配列
 '  [i]tgtStdModules           コピー対象の標準モジュール名の配列
 '  [i]tgtClsModules           コピー対象のクラスモジュール名の配列
-'  [i]toPath                   コピー先のExcelブックオブジェクト
-'  [i]fileName                ファイル名
-'  [o]wbNew      保存したExcelファイルのオブジェクト
 '  関数の返り値：一つ以上コピーに成功したらTrue
 '--------------------------------------------------
 Public Function copySheetsAndModulesIntoNewFileThenSave( _
-                                        ByVal wb As Workbook, _
+                                        ByVal wbFrom As Workbook, _
+                                        ByVal wbTo As Workbook, _
                                         ByVal tgtSheets As Variant, _
                                         ByVal tgtStdModules As Variant, _
-                                        ByVal tgtClsModules As Variant, _
-                                        ByVal toPath As String, _
-                                        ByVal fileName As String, _
-                                        ByRef wbNew As Workbook _
+                                        ByVal tgtClsModules As Variant _
                                         ) As Boolean
-    Workbooks.Add
-    Set wbNew = Application.ActiveWorkbook
     
     Dim bRet1 As Boolean, bRet2 As Boolean, bRet3 As Boolean
-    Dim copiedSheets As New Collection, copiedModules As New Collection
-    bRet1 = copySheets(wb, tgtSheets, wbNew, copiedSheets)
-    bRet2 = copyModules(wb, tgtStdModeles, vbext_ct_StdModule, wbNew, copiedModules)
-    bRet3 = copyModules(wb, tgtClsModeles, vbext_ct_ClassModule, wbNew, copiedModules)
-
-    'Save the new book as ...
-    Dim objFso As Object
-    Dim newWbPath As String
-    Set objFso = CreateObject("Scripting.FileSystemObject")
-         newWbPath = objFso.BuildPath(toPath, fileName)
-    Set objFso = Nothing
-    
-    On Error Resume Next
-    If bRet2 = False And bRet3 = False Then
-        Call wbNew.SaveAs(fileName:=newWbPath, FileFormat:=xlOpenXMLWorkbook)
-    Else
-        Call wbNew.SaveAs(fileName:=newWbPath, FileFormat:=xlOpenXMLWorkbookMacroEnabled)
-    End If
-    On Error GoTo 0
+    Dim copiedSheets As New Collection, copiedStdModules As New Collection, copiedClsModules As New Collection
+    bRet1 = copySheets(wbFrom, tgtSheets, wbTo, copiedSheets)
+    bRet2 = copyModules(wbFrom, tgtStdModules, vbext_ct_StdModule, wbTo, copiedStdModules)
+    bRet3 = copyModules(wbFrom, tgtClsModules, vbext_ct_ClassModule, wbTo, copiedClsModules)
     
     copySheetsAndModulesIntoNewFileThenSave = bRet1 Or bRet2 Or bRet3
 End Function
@@ -178,7 +157,7 @@ Public Function copySheets(ByVal wbFrom As Workbook, _
     For i = 1 To UBound(tgtSheets) Step 1
         tgtSh = tgtSheets(i)
         If sh.existSheet(wbFrom, tgtSh) Then
-            wbFrom.Sheets(tgtSh).Copy After:=wbTo.Sheets(wbTo.Sheets.count)
+            wbFrom.sheets(tgtSh).Copy After:=wbTo.sheets(wbTo.sheets.count)
             copiedSheets.Add (tgtSh)
         End If
     Next i

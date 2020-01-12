@@ -23,7 +23,7 @@ Public Function deleteUnSpecifiedSheets(ByVal wb As Workbook, _
 
     Dim res As Variant
     Dim sh As Worksheet
-    For Each sh In wb.Sheets
+    For Each sh In wb.sheets
         '要素を検索
         res = Filter(remainSheets, sh.name)
         '戻り値配列のサイズで要素の有無を判定
