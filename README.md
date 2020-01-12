@@ -3,8 +3,7 @@
 ファイル処理クラス : clFiles.cls
 =========
 
-1. Export some specified modules into the specified directory. / 指定されたモジュールを指定したディレクトリへエクスポートする。
-  - `exportModules`
+1. Export some specified modules into the specified directory. / 指定されたモジュールを指定したディレクトリへエクスポートする。`exportModules`
 
 1. Get the full path of all Excel files under the specified directory / 指定したディレクトリ配下にある全Excelファイルのフルパス取得 `getAllXlsFilePathCol`
 
