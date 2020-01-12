@@ -11,11 +11,11 @@ Option Explicit
 Option Base 1
 
 '=============================
-'指定されたモジュールを指定したディレクトリへエクスポートする。
+'
+' 指定されたモジュールを指定したディレクトリへエクスポートする。
 '  [i]wb                   エクスポート元のExcelブックオブジェクト
 '  [i]tgtModules       エクスポート対象のモジュール名の配列
 '  [i]toPath             エクスポート先のExcelブックオブジェクト
-'  [o]copiedModules      エクスポートが成功したモジュール名前群
 '  関数の返り値：一つ以上エクスポートに成功したらTrue
 '--------------------------------------------------
 Public Function exportModules( _
@@ -35,7 +35,7 @@ Public Function exportModules( _
         If sh.existModule(wb, tgtMo) Then
         
             With wb.VBProject.VBComponents(tgtMo)
-                    '指定されたモジュールの拡張子を取得
+                    'Get extention for the module.
                     Select Case .Type
                     Case vbext_ct_StdModule
                         ext = "bas"

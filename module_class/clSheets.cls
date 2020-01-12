@@ -11,16 +11,13 @@ Option Explicit
 Option Base 1
 
 
-
-
 '==================================================
 ' 指定したシート以外のシートを削除する
 '  [i]wb                対象のWorkbook
-'  [i]remainSheets     確認するモジュール名
+'  [i]remainSheets     残すシート名の配列
 '--------------------------------------------------
 Public Function deleteUnSpecifiedSheets(ByVal wb As Workbook, _
                                                                 ByVal remainSheets As Variant) As Boolean
-
     Dim res As Variant
     Dim sh As Worksheet
     For Each sh In wb.sheets

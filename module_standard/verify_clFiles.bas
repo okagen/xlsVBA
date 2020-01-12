@@ -99,13 +99,14 @@ End Sub
 
 
 '==================================================
-Private Function verify_clFiles_makeDummyExcelFileWithDummySheets(ByVal sheets As Variant, _
+Public Function verify_clFiles_makeDummyExcelFileWithDummySheets(ByVal sheets As Variant, _
                                                                                         ByRef dummyWb As Workbook) As Boolean
     Workbooks.Add
     Set dummyWb = Application.ActiveWorkbook
     
     Dim sh As New clSheet
     Dim i As Long
+    Dim bRet As Boolean
     For i = 1 To UBound(sheets) Step 1
         bRet = sh.initSheet(dummyWb, sheets(i))
     Next i

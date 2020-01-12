@@ -5,19 +5,21 @@ Option Base 1
 '==================================================
 Sub verify_clSheets_deleteUnSpecifiedSheets()
 
+    'ダミーのシートを持つ、ダミー①のファイルを作成。
+    Dim dummySheets As Variant
+    Dim dummyWb As Workbook
+    Dim bRet As Boolean
+    dummySheets = Array("dummy1", "dummy2", "dummy3", "dummy4", "dummy5")
+    bRet = verify_clFiles_makeDummyExcelFileWithDummySheets(dummySheets, dummyWb)
+    
     Dim shs As New clSheets
     Dim remainSheets As Variant
-    Dim bRet As Boolean
-    Dim wb As Workbook
-    Set wb = ThisWorkbook
-    
     '=======================
-    remainSheets = Array("R02中結果_国語", "H29小結果_国語A", "$領域観点_R02中_国語", "$領域観点_H29小_国語A")
-
+    remainSheets = Array("dummy2", "dummy3", "dummy4")
     '=======================
     
     'check existance of the module.
-    bRet = shs.deleteUnSpecifiedSheets(wb, remainSheets)
+    bRet = shs.deleteUnSpecifiedSheets(dummyWb, remainSheets)
     
     If bRet Then
         Debug.Print "result ::: exist-->" & CStr(bRet) & " |" & Now
