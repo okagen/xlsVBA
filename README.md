@@ -34,7 +34,7 @@
 1. Delete sheets except specified.  指定したシート以外のシートを削除する。`deleteUnSpecifiedSheets`
  
 
-# 過去に作成した下記関数群を現在見直し中。
+# ↓↓↓ 過去に作成した下記関数群を現在見直し中。
 
 excel_vba
 =========
