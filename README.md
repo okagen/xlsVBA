@@ -3,20 +3,36 @@
 ファイル処理クラス : clFiles.cls
 =========
 
-1. Export some specified modules into the specified directory. / 指定されたモジュールを指定したディレクトリへエクスポートする。`exportModules(***) As Boolean`
+1. Export some specified modules into the specified directory. / 指定されたモジュールを指定したディレクトリへエクスポートする。
+  - `exportModules`
 
-1. Get the full path of all Excel files under the specified directory / 指定したディレクトリ配下にある全Excelファイルのフルパス取得 `getAllXlsFilePathCol(***) As Boolean`
+1. Get the full path of all Excel files under the specified directory / 指定したディレクトリ配下にある全Excelファイルのフルパス取得 `getAllXlsFilePathCol`
 
-1. Copy some specified sheets and modules from one excel book into another. / 指定されたシート、モジュールを、新しいブックの中にコピーする。`copySheetsAndModules(***) As Boolean`
+1. Copy some specified sheets and modules from one excel book into another. / 指定されたシート、モジュールを、新しいブックの中にコピーする。`copySheetsAndModules`
 
 1. Copy some specified modules from one excel book into another. / 指定されたモジュールを別のブックの中にコピーする。`copyModules(***) As Boolean`
 
-1. Copy some specified sheets from one excel book into another. / Excelファイル内の指定されたシートを別のExcelファイルコピーする。`copySheets(***) As Boolean`
+1. Copy some specified sheets from one excel book into another. / Excelファイル内の指定されたシートを別のExcelファイルコピーする。`copySheets`
 
 シート処理クラス : clSheet.cls
 =========
 
+1. Create several sheets by specifying their names. If a sheet with the same name exists, delete its contents. / 名前を指定してSheetを作成。 同名のシートが存在した場合その中身を削除する。`initSheet`
 
+1. Create several sheets by specifying their names.If a sheet with the same name exists, add (#) to the end of the sheet name and count up the number. / 名前を指定してSheetを作成。 同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。`newSheet`
+
+1. Check Module existence by specifying the name. / 名前を指定してModuleの有無をチェック。`existModule`
+
+1. Check Module existence by specifying the name. / 名前を指定してSheetの有無をチェック。`existSheet`
+
+1. Check Module existence by specifying the name with wild-card character. / 名前を指定(ワイルドカード可)してSheetの有無をチェック。`existSheetWithWildCardCharacter`
+
+
+
+シートをまたがった処理クラス : clSheets.cls
+=========
+
+1. Delete sheets except specified. \ 指定したシート以外のシートを削除する。`deleteUnSpecifiedSheets`
  
 
 # 過去に作成した下記関数群を現在見直し中。
