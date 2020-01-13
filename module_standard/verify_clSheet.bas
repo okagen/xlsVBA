@@ -2,6 +2,45 @@ Attribute VB_Name = "verify_clSheet"
 Option Explicit
 Option Base 1
 
+'==================================================
+Sub verify_clSheet_getDataAsArray()
+    Dim sh As New clSheet
+    Dim bRet As Boolean
+    Dim dummyArr(10, 10) As Variant
+    Dim i As Integer, j As Integer
+    '=======================
+    For i = 1 To 10 Step 1
+        For j = 1 To 10 Step 1
+           dummyArr(i, j) = "dat_" & i & "_" & j
+        Next j
+    Next i
+    'initialize the sheet to verification
+    bRet = sh.initSheet(ThisWorkbook, "$verify1")
+    'plot all data on the $verify sheet
+    With ThisWorkbook.sheets("$verify1")
+        .Select
+        .Range(.Cells(1, 1), .Cells(UBound(dummyArr, 1), UBound(dummyArr, 2))) = dummyArr
+    End With
+    '=======================
+    
+    Dim dat As Variant
+    Dim r As Long, c As Long
+    'get data in the sheet
+    bRet = sh.getDataAsArray(ThisWorkbook, "$verify1", 1, 5, 1, 7, dat, r, c)
+    
+    If bRet = True Then
+        'initialize the sheet to verification
+        bRet = sh.initSheet(ThisWorkbook, "$verify2")
+        'plot all data on the $verify sheet
+        With ThisWorkbook.sheets("$verify2")
+            .Select
+            .Range(.Cells(1, 1), .Cells(UBound(dat, 1), UBound(dat, 2))) = dat
+            Debug.Print "result ::: done " & " |" & Now
+        End With
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+End Sub
 
 '==================================================
 Sub verify_clSheet_initSheet()

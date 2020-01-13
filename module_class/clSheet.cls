@@ -12,6 +12,51 @@ Option Base 1
 
 
 '==================================================
+' Sheet内の指定した領域をArrayに格納する。シートの有無チェックは呼び出し側でやっておく
+'  [i]wb        対象のWorkbook
+'  [i]shName    シート名
+'  [i]datRowS   データ領域のスタート行
+'  [i]datRowE   データ領域の最終行「0」の場合シートの最後の行まで検索する。
+'  [i]datColS   データ領域の最初の列（一番左の列)
+'  [i]datColE   データ領域の最後の列（一番右の列)
+'  [o]dat       取得したデータ
+'  [o]r       最終行数
+'  [o]c       列数
+'--------------------------------------------------
+Public Function getDataAsArray(ByVal wb As Workbook, _
+                                    ByVal shName As String, _
+                                    ByVal datRowS As Long, _
+                                    ByVal datRowE As Long, _
+                                    ByVal datColS As Long, _
+                                    ByVal datColE As Long, _
+                                    ByRef dat As Variant, _
+                                    ByRef r As Long, _
+                                    ByRef c As Long) As Boolean
+    Dim lastRow As Long
+    Dim ret As Variant
+    With wb.sheets(shName)
+        '最終行取得
+        If datRowE = 0 Then
+            lastRow = .UsedRange.Cells(.UsedRange.count).row
+        Else
+            lastRow = datRowE
+        End If
+        'データ取得
+        ret = .Range(.Cells(datRowS, datColS), .Cells(lastRow, datColE)).Value
+    End With
+    
+    '返り値設定
+    If lastRow - datRowS >= 0 Then
+        dat = ret
+        c = datColE - datColS + 1
+        r = lastRow - datRowS + 1
+        getDataAsArray = True
+    Else
+        getDataAsArray = False
+    End If
+End Function
+
+'==================================================
 ' Create several sheets by specifying their names. If a sheet with the same name exists, delete its contents.
 ' 名前を指定してSheetを作成。 同名のシートが存在した場合その中身を削除する。
 '  [i]wb        対象のWorkbook
@@ -613,51 +658,6 @@ Public Function getColDataAsArray(ByVal wb As Workbook, _
     End If
 End Function
 
-'==================================================
-'Sheet内のデータ領域をArrayに格納する
-'シートの有無チェックは呼び出し側でやっておく
-'  [i]wb        対象のWorkbook
-'  [i]shName    シート名
-'  [i]datRowS   データ領域のスタート行
-'  [i]datRowE   データ領域の最終行「0」の場合シートの最後の行まで検索する。
-'  [i]datColS   データ領域の最初の列（一番左の列)
-'  [i]datColE   データ領域の最後の列（一番右の列)
-'  [o]dat       取得したデータ
-'  [o]row       最終行数
-'  [o]col       列数
-'--------------------------------------------------
-Public Function getDataAsArray(ByVal wb As Workbook, _
-                                    ByVal shName As String, _
-                                    ByVal datRowS As Long, _
-                                    ByVal datRowE As Long, _
-                                    ByVal datColS As Long, _
-                                    ByVal datColE As Long, _
-                                    ByRef dat As Variant, _
-                                    ByRef row As Long, _
-                                    ByRef col As Long) As Boolean
-    Dim lastRow As Long
-    Dim ret As Variant
-    With wb.sheets(shName)
-        '最終行取得
-        If datRowE = 0 Then
-            lastRow = .UsedRange.Cells(.UsedRange.count).row
-        Else
-            lastRow = datRowE
-        End If
-        'データ取得
-        ret = .Range(.Cells(datRowS, datColS), .Cells(lastRow, datColE)).Value
-    End With
-    
-    '返り値設定
-    If lastRow - datRowS >= 0 Then
-        dat = ret
-        col = datColE - datColS + 1
-        row = lastRow - datRowS + 1
-        getDataAsArray = True
-    Else
-        getDataAsArray = False
-    End If
-End Function
 
 '==================================================
 '名前を指定して既存Sheetをコピー。

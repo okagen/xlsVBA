@@ -23,7 +23,7 @@ Sub verify_clFiles_exportModules()
 
     'export standard modules.
     '=======================
-    tgtModules = Array("verify_clFiles", "verify_clSheet", "verify_clSheets")
+    tgtModules = Array("verify_clArr", "verify_clFiles", "verify_clSheet", "verify_clSheets")
     toPath = "C:\my_work\GitHub\excel_vba\module_standard"
     '=======================
     bRet = fl.exportModules(wb, tgtModules, toPath)

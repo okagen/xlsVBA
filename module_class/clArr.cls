@@ -9,8 +9,36 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 Option Base 1
-Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (Destination As Any, Source As Any, ByVal Length As Long)
 
+'==================================================
+' Collectionの中身を2次元配列(Array)に変換。
+'  [i]coll    Collection
+'  [i]isRow true=行に入れる。(1,1)(1,2)・・・
+'               false=列に入れる。(1,1)(2,1)・・・
+'  [o]arr    変換後の配列
+'--------------------------------------------------
+Public Function cnvCollToArr(ByVal coll As Collection, _
+                                            ByVal isRow As Boolean, _
+                                            ByRef arr As Variant _
+                                            ) As Boolean
+    Dim retArr As Variant
+    Dim i As Long
+    
+    If isRow = True Then
+        ReDim retArr(1 To 1, 1 To coll.count)
+        For i = 1 To coll.count Step 1
+            retArr(1, i) = coll(i)
+        Next i
+    Else
+        ReDim retArr(1 To coll.count, 1 To 1)
+        For i = 1 To coll.count Step 1
+            retArr(i, 1) = coll(i)
+        Next i
+    End If
+    
+    arr = retArr
+    cnvCollToArr = True
+End Function
 
 
 '---------------------------------------------
@@ -47,36 +75,6 @@ Public Function transposeArray(ByVal arr As Variant, _
     transposeArray = True
 End Function
 
-
-'==================================================
-'Collectionの中身を2次元配列に入れなおす。
-'  [i]coll    Collection
-'  [i]isRow 行用か列用 true=行(1,1)(1,2)・・・
-'                               false=列(1,1)(2,1)・・・
-'  [o]arr    変換後の配列
-'--------------------------------------------------
-Public Function cnvCollToArr(ByVal coll As Collection, _
-                                            ByVal isRow As Boolean, _
-                                            ByRef arr As Variant _
-                                            ) As Boolean
-    Dim retArr As Variant
-    Dim i As Long
-    
-    If isRow = True Then
-        ReDim retArr(1 To 1, 1 To coll.count)
-        For i = 1 To coll.count Step 1
-            retArr(1, i) = coll(i)
-        Next i
-    Else
-        ReDim retArr(1 To coll.count, 1 To 1)
-        For i = 1 To coll.count Step 1
-            retArr(i, 1) = coll(i)
-        Next i
-    End If
-    
-    arr = retArr
-    cnvCollToArr = True
-End Function
 
 '==================================================
 '2次元配列を1行ずつCollectionに入れなおす。
