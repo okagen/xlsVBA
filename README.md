@@ -3,14 +3,13 @@
 ファイル処理クラス : clFiles.cls
 =========
 
-1. Export some specified modules into the specified directory. / 指定されたモジュールを指定したディレクトリへエクスポートする。
-  - `exportModules`
+1. Export some specified modules into the specified directory. / 指定されたモジュールを指定したディレクトリへエクスポートする。`exportModules`
 
-1. Get the full path of all Excel files under the specified directory / 指定したディレクトリ配下にある全Excelファイルのフルパス取得 `getAllXlsFilePathCol`
+1. Get the full path of all Excel files under the specified directory / 指定したディレクトリ配下にある全Excelファイルのフルパス取得。 `getAllXlsFilePathCol`
 
 1. Copy some specified sheets and modules from one excel book into another. / 指定されたシート、モジュールを、新しいブックの中にコピーする。`copySheetsAndModules`
 
-1. Copy some specified modules from one excel book into another. / 指定されたモジュールを別のブックの中にコピーする。`copyModules(***) As Boolean`
+1. Copy some specified modules from one excel book into another. / 指定されたモジュールを別のブックの中にコピーする。`copyModules`
 
 1. Copy some specified sheets from one excel book into another. / Excelファイル内の指定されたシートを別のExcelファイルコピーする。`copySheets`
 
@@ -32,10 +31,10 @@
 シートをまたがった処理クラス : clSheets.cls
 =========
 
-1. Delete sheets except specified. \ 指定したシート以外のシートを削除する。`deleteUnSpecifiedSheets`
+1. Delete sheets except specified.  指定したシート以外のシートを削除する。`deleteUnSpecifiedSheets`
  
 
-# 過去に作成した下記関数群を現在見直し中。
+# ↓↓↓ 過去に作成した下記関数群を現在見直し中。
 
 excel_vba
 =========
