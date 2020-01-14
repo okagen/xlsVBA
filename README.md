@@ -1,4 +1,10 @@
 
+配列処理クラス : clArray.cls
+=========
+
+1. Convert the contents in Collection object into a two-dimensional array. / Collectionの中身を2次元配列(Array)に変換。`cnvCollToArr`
+
+
 
 ファイル処理クラス : clFiles.cls
 =========
@@ -16,6 +22,8 @@
 シート処理クラス : clSheet.cls
 =========
 
+1. Store the specified area in Sheet into Array. Before calling this function, need to check whether the target sheet has existed or not. / Sheet内の指定した領域をArrayに格納する。呼び出し元の関数で、対象シートが存在するかどうかを確認しておく。`getDataAsArray`
+
 1. Create several sheets by specifying their names. If a sheet with the same name exists, delete its contents. / 名前を指定してSheetを作成。 同名のシートが存在した場合その中身を削除する。`initSheet`
 
 1. Create several sheets by specifying their names.If a sheet with the same name exists, add (#) to the end of the sheet name and count up the number. / 名前を指定してSheetを作成。 同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。`newSheet`
@@ -28,7 +36,7 @@
 
 
 
-シートをまたがった処理クラス : clSheets.cls
+シートをまたいだ処理クラス : clSheets.cls
 =========
 
 1. Delete sheets except specified.  指定したシート以外のシートを削除する。`deleteUnSpecifiedSheets`
