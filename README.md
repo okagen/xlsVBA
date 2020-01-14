@@ -36,7 +36,7 @@
 
 
 
-シートをまたがった処理クラス : clSheets.cls
+シートをまたいだ処理クラス : clSheets.cls
 =========
 
 1. Delete sheets except specified.  指定したシート以外のシートを削除する。`deleteUnSpecifiedSheets`
