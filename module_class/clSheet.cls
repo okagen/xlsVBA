@@ -12,7 +12,8 @@ Option Base 1
 
 
 '==================================================
-' Sheet内の指定した領域をArrayに格納する。シートの有無チェックは呼び出し側でやっておく
+' Store the specified area in Sheet into Array. Before calling this function, need to check whether the target sheet has existed or not.
+' Sheet内の指定した領域をArrayに格納する。呼び出し元の関数で、対象シートが存在するかどうかを確認しておく。
 '  [i]wb        対象のWorkbook
 '  [i]shName    シート名
 '  [i]datRowS   データ領域のスタート行

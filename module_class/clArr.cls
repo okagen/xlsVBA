@@ -11,6 +11,7 @@ Option Explicit
 Option Base 1
 
 '==================================================
+' Convert the contents in Collection object into a two-dimensional array.
 ' Collectionの中身を2次元配列(Array)に変換。
 '  [i]coll    Collection
 '  [i]isRow true=行に入れる。(1,1)(1,2)・・・
