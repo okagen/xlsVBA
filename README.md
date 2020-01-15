@@ -38,7 +38,7 @@
 
 
 
-シートをまたいだ処理クラス : clSheets.cls
+複数のシートをまたいだ処理クラス : clSheets.cls
 =========
 
 1. Convert all cells on some worksheets to values. / 指定した複数シートの全てのセルを「値」に変換。`convAllCellsOnSheetsToValues`
