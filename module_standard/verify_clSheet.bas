@@ -3,6 +3,36 @@ Option Explicit
 Option Base 1
 
 '==================================================
+Sub verify_clSheet_convAllCellsOnSheetToValues()
+    Dim sh As New clSheet
+    Dim bRet As Boolean
+    Dim dummyArr(10, 10) As Variant
+    Dim i As Integer, j As Integer
+    '=======================
+    For i = 1 To 10 Step 1
+        For j = 1 To 10 Step 1
+            dummyArr(i, j) = "=" & i & "+" & j
+        Next j
+    Next i
+    'initialize the sheet to verification
+    bRet = sh.initSheet(ThisWorkbook, "$verify")
+    'plot all data on the $verify sheet
+    With ThisWorkbook.sheets("$verify")
+        .Select
+        .Range(.Cells(1, 1), .Cells(UBound(dummyArr, 1), UBound(dummyArr, 2))) = dummyArr
+    End With
+    '=======================
+    
+    bRet = sh.convAllCellsOnSheetToValues(ThisWorkbook, "$verify")
+    
+    If bRet = True Then
+        Debug.Print "result ::: done " & " |" & Now
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+End Sub
+
+'==================================================
 Sub verify_clSheet_getDataAsArray()
     Dim sh As New clSheet
     Dim bRet As Boolean

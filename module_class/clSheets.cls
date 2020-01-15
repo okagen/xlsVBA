@@ -12,6 +12,32 @@ Option Base 1
 
 
 '==================================================
+' Convert all cells on some worksheets to values.
+' シートの全てのセルを「値」に変換
+'  [i]wb        対象のWorkbook
+'  [i]shName    シート名
+'--------------------------------------------------
+Public Function convAllCellsOnSheetsToValues(ByVal wb As Workbook, _
+                                                                     ByVal shNames As Variant _
+                                                                    ) As Boolean
+    Dim res As Variant
+    Dim wsh As Worksheet
+    Dim sh As New clSheet
+    Dim bRet As Boolean
+    bRet = False
+    For Each wsh In wb.sheets
+        '要素を検索
+        res = Filter(shNames, wsh.name)
+        '戻り値配列のサイズで要素の有無を判定
+        If UBound(res) >= 0 Then
+            bRet = sh.convAllCellsOnSheetToValues(wb, wsh.name)
+            bRet = True
+        End If
+    Next wsh
+    convAllCellsOnSheetsToValues = bRet
+End Function
+
+'==================================================
 ' Delete sheets except specified.
 ' 指定したシート以外のシートを削除する
 '  [i]wb                    対象のWorkbook
@@ -20,15 +46,15 @@ Option Base 1
 Public Function deleteUnSpecifiedSheets(ByVal wb As Workbook, _
                                                                 ByVal remainSheets As Variant) As Boolean
     Dim res As Variant
-    Dim sh As Worksheet
-    For Each sh In wb.sheets
+    Dim wsh As Worksheet
+    For Each wsh In wb.sheets
         '要素を検索
-        res = Filter(remainSheets, sh.name)
+        res = Filter(remainSheets, wsh.name)
         '戻り値配列のサイズで要素の有無を判定
         If UBound(res) = -1 Then
-            sh.Delete
+            wsh.Delete
         End If
-    Next sh
+    Next wsh
 End Function
 
 '---------------------------------------------

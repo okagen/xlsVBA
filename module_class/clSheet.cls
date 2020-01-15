@@ -10,6 +10,24 @@ Attribute VB_Exposed = False
 Option Explicit
 Option Base 1
 
+'==================================================
+' Convert all cells on a worksheet to values.
+' シートの全てのセルを「値」に変換
+'  [i]wb        対象のWorkbook
+'  [i]shName    シート名
+'--------------------------------------------------
+Public Function convAllCellsOnSheetToValues(ByVal wb As Workbook, _
+                                                                    ByVal shName As String _
+                                                                    ) As Boolean
+    Dim lastRow As Long
+    Dim ret As Variant
+    With wb.sheets(shName)
+        .Activate
+        .Cells.Select
+        Selection.Copy
+        .Range("A1").PasteSpecial xlPasteValues
+    End With
+End Function
 
 '==================================================
 ' Store the specified area in Sheet into Array. Before calling this function, need to check whether the target sheet has existed or not.

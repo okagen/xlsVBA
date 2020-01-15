@@ -63,7 +63,7 @@ Sub verify_clFiles_getAllXlsFilePathCol()
 End Sub
 
 '==================================================
-Sub verify_clFiles_copySheetsAndModulesIntoNewFileThenSave()
+Sub verify_clFiles_copySheetsAndModules()
     Dim bRet As Boolean
     Dim tgtSheets As Variant
     Dim tgtStdModules As Variant
@@ -91,25 +91,20 @@ Sub verify_clFiles_copySheetsAndModulesIntoNewFileThenSave()
     tgtSheets = Array("dummy1", "dummy3", "dummy5")
     tgtStdModules = Array()
     tgtClsModules = Array()
-    bRet = fl.copySheetsAndModulesIntoNewFileThenSave(dummyWb1, dummyWb2, tgtSheets, tgtStdModules, tgtClsModules)
+    bRet = fl.copySheetsAndModules(dummyWb1, dummyWb2, tgtSheets, tgtStdModules, tgtClsModules)
     Debug.Print "result ::: verify_clFiles_copySheetsAndModulesIntoNewFileThenSave done -->" & CStr(bRet) & " |" & Now
     '=======================
     
     'Thisworkbookから、ダミー②へ、モジュールをいくつかコピー
     '=======================
-    tgtSheets = Array()
+    tgtSheets = Array("R02中結果_国語")
     tgtStdModules = Array("verify", "verify_clFiles")
     tgtClsModules = Array("clFiles", "clSheet")
-    bRet = fl.copySheetsAndModulesIntoNewFileThenSave(ThisWorkbook, dummyWb2, tgtSheets, tgtStdModules, tgtClsModules)
+    bRet = fl.copySheetsAndModules(ThisWorkbook, dummyWb2, tgtSheets, tgtStdModules, tgtClsModules)
     Debug.Print "result ::: verify_clFiles_copySheetsAndModulesIntoNewFileThenSave done -->" & CStr(bRet) & " |" & Now
     '=======================
-    
-    
-'    tgtStdModules = Array("verify", "verify_clFiles")
-'    tgtClsModules = Array("clFiles", "clSheet")
-'    toPath = wb.Path
-'    fileName = "verify_clFiles_copySheetsIntoNewFile1"
-'
+    Dim sh As New clSheet
+    bRet = sh.convAllCellsIntoValue(dummyWb2, tgtSheets(1))
     
 '    'Save the new book as ...
 '    Dim objFso As Object
@@ -125,6 +120,7 @@ Sub verify_clFiles_copySheetsAndModulesIntoNewFileThenSave()
 '        Call wbNew.SaveAs(fileName:=newWbPath, FileFormat:=xlOpenXMLWorkbookMacroEnabled)
 '    End If
 '    On Error GoTo 0
+
 End Sub
 
 

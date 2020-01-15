@@ -3,6 +3,44 @@ Option Explicit
 Option Base 1
 
 '==================================================
+Sub verify_clSheet_convAllCellsOnSheetsToValues()
+    Dim sh As New clSheet
+    Dim shs As New clSheets
+    Dim bRet As Boolean
+    Dim dummyArr(10, 10) As Variant
+    Dim i As Integer, j As Integer
+    '=======================
+    For i = 1 To 10 Step 1
+        For j = 1 To 10 Step 1
+            dummyArr(i, j) = "=" & i & "+" & j
+        Next j
+    Next i
+    'initialize the sheet to verification
+    bRet = sh.initSheet(ThisWorkbook, "$verify1")
+    bRet = sh.initSheet(ThisWorkbook, "$verify2")
+    'plot all data on the $verify sheet
+    With ThisWorkbook.sheets("$verify1")
+        .Select
+        .Range(.Cells(1, 1), .Cells(UBound(dummyArr, 1), UBound(dummyArr, 2))) = dummyArr
+    End With
+    With ThisWorkbook.sheets("$verify2")
+        .Select
+        .Range(.Cells(1, 1), .Cells(UBound(dummyArr, 1), UBound(dummyArr, 2))) = dummyArr
+    End With
+    '=======================
+    Dim sheets As Variant
+    sheets = Array("$verify1")
+    bRet = shs.convAllCellsOnSheetsToValues(ThisWorkbook, sheets)
+    
+    If bRet = True Then
+        Debug.Print "result ::: done " & " |" & Now
+    Else
+        Debug.Print "result ::: no data" & " |" & Now
+    End If
+End Sub
+
+
+'==================================================
 Sub verify_clSheets_deleteUnSpecifiedSheets()
 
     'ダミーのシートを持つ、ダミーのファイルを作成。

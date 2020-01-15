@@ -119,7 +119,7 @@ Public Function copySheetsAndModules( _
     bRet2 = copyModules(wbFrom, tgtStdModules, vbext_ct_StdModule, wbTo, copiedStdModules)
     bRet3 = copyModules(wbFrom, tgtClsModules, vbext_ct_ClassModule, wbTo, copiedClsModules)
     
-    copySheetsAndModulesIntoNewFileThenSave = bRet1 Or bRet2 Or bRet3
+    copySheetsAndModules = bRet1 Or bRet2 Or bRet3
 End Function
 
 
