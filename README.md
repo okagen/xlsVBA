@@ -22,6 +22,8 @@
 シート処理クラス : clSheet.cls
 =========
 
+1. Convert all cells on a worksheet to values. / 指定したシートの全てのセルを「値」に変換。`convAllCellsOnSheetToValues`
+
 1. Store the specified area in Sheet into Array. Before calling this function, need to check whether the target sheet has existed or not. / Sheet内の指定した領域をArrayに格納する。呼び出し元の関数で、対象シートが存在するかどうかを確認しておく。`getDataAsArray`
 
 1. Create several sheets by specifying their names. If a sheet with the same name exists, delete its contents. / 名前を指定してSheetを作成。 同名のシートが存在した場合その中身を削除する。`initSheet`
@@ -38,6 +40,8 @@
 
 シートをまたいだ処理クラス : clSheets.cls
 =========
+
+1. Convert all cells on some worksheets to values. / 指定した複数シートの全てのセルを「値」に変換。`convAllCellsOnSheetsToValues`
 
 1. Delete sheets except specified.  指定したシート以外のシートを削除する。`deleteUnSpecifiedSheets`
  
