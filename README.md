@@ -41,6 +41,10 @@
 複数のシートをまたいだ処理クラス : clSheets.cls
 =========
 
+1. Hide the sheets with the specified prefix character. / 指定した接頭文字を持つシートを非表示にする。`hideSheetsWithPrefix`
+
+1. Show the sheets with the specified prefix character. / 指定した接頭文字を持つシートを表示する。`showSheetsWithPrefix`
+
 1. Convert all cells on some worksheets to values. / 指定した複数シートの全てのセルを「値」に変換。`convAllCellsOnSheetsToValues`
 
 1. Delete sheets except specified.  指定したシート以外のシートを削除する。`deleteUnSpecifiedSheets`
