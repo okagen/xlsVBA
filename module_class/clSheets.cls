@@ -10,6 +10,48 @@ Attribute VB_Exposed = False
 Option Explicit
 Option Base 1
 
+'==================================================
+' Hide the sheets with the specified prefix character.
+' 指定した接頭文字を持つシートを非表示にする。
+'  [i]wb            対象のWorkbook
+'  [i]pfx           非表示にするシートの接頭文字
+'  [i]pfxIgnore  非表示にしないシートの接頭文字
+'--------------------------------------------------
+Public Function hideSheetsWithPrefix(ByVal wb As Workbook, _
+                                                        ByVal pfx As String, _
+                                                        Optional pfxIgnore As String = "" _
+                                                       ) As Boolean
+    Dim res As Variant
+    Dim wsh As Worksheet
+    For Each wsh In wb.sheets
+        If pfxIgnore = "" Or Not pfxIgnore = Left(wsh.name, Len(pfxIgnore)) Then
+            If pfx = Left(wsh.name, Len(pfx)) Then wsh.Visible = False
+        End If
+    Next wsh
+    hideSheetsWithPrefix = True
+End Function
+
+'==================================================
+' Show the sheets with the specified prefix character.
+' 指定した接頭文字を持つシートを表示する。
+'  [i]wb            対象のWorkbook
+'  [i]pfx           表示するシートの接頭文字
+'  [i]pfxIgnore  表示しないシートの接頭文字
+'--------------------------------------------------
+Public Function showSheetsWithPrefix(ByVal wb As Workbook, _
+                                                        ByVal pfx As String, _
+                                                        Optional pfxIgnore As String = "" _
+                                                       ) As Boolean
+    Dim res As Variant
+    Dim wsh As Worksheet
+    For Each wsh In wb.sheets
+        If pfxIgnore = "" Or Not pfxIgnore = Left(wsh.name, Len(pfxIgnore)) Then
+            If pfx = Left(wsh.name, Len(pfx)) Then wsh.Visible = True
+        End If
+    Next wsh
+    showSheetsWithPrefix = True
+End Function
+
 
 '==================================================
 ' Convert all cells on some worksheets to values.
