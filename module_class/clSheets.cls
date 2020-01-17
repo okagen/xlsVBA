@@ -64,9 +64,10 @@ Public Function convAllCellsOnSheetsToValues(ByVal wb As Workbook, _
                                                                     ) As Boolean
     Dim res As Variant
     Dim wsh As Worksheet
-    Dim sh As New clSheet
     Dim bRet As Boolean
     bRet = False
+    Dim sh As clSheet
+    Set sh = New clSheet
     For Each wsh In wb.sheets
         'óvëfÇåüçı
         res = Filter(shNames, wsh.name)
@@ -76,6 +77,7 @@ Public Function convAllCellsOnSheetsToValues(ByVal wb As Workbook, _
             bRet = True
         End If
     Next wsh
+    Set sh = Nothing
     convAllCellsOnSheetsToValues = bRet
 End Function
 
@@ -162,23 +164,23 @@ Public Function getTargetSheets(ByVal wb As Workbook, _
                                 ByVal ignoreSheetNames As Collection, _
                                 ByRef targetSheets As Collection) As Boolean
                                 
-    Dim xlsheet As Worksheet
+    Dim wsh As Worksheet
     Dim ignoreSheetName As Variant
     Dim bTgt As Boolean
     
-    For Each xlsheet In wb.Worksheets
+    For Each wsh In wb.Worksheets
         
         bTgt = True
         
         For Each ignoreSheetName In ignoreSheetNames
             'ëŒè€Ç»ÇÁÇŒÅAcollectionÇ…í«â¡
-            If Left(xlsheet.name, Len(ignoreSheetName)) = ignoreSheetName Then
+            If Left(wsh.name, Len(ignoreSheetName)) = ignoreSheetName Then
                 bTgt = False
             End If
         Next
         
         If bTgt = True Then
-            targetSheets.Add (xlsheet.name)
+            targetSheets.Add (wsh.name)
         End If
     Next
    

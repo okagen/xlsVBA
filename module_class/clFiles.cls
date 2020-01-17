@@ -26,9 +26,10 @@ Public Function exportModules( _
                                         ) As Boolean
     Dim tgtMo As String, prg As String
     Dim i As Long
-    Dim sh As New clSheet
     Dim ext As String
     Dim bRet As Boolean
+    Dim sh As clSheet
+    Set sh = New clSheet
     
     bRet = False
     For i = 1 To UBound(tgtModules) Step 1
@@ -38,11 +39,11 @@ Public Function exportModules( _
             With wb.VBProject.VBComponents(tgtMo)
                     'Get extention for the module.
                     Select Case .Type
-                    Case vbext_ct_StdModule
+                    Case 1 'vbext_ct_StdModule
                         ext = "bas"
-                    Case vbext_ct_ClassModule, vbext_ct_Document
+                    Case 2 'vbext_ct_ClassModule
                         ext = "cls"
-                    Case vbext_ct_MSForm
+                    Case 3 'vbext_ct_MSForm
                         ext = "frm"
                     End Select
                     
@@ -58,6 +59,7 @@ Public Function exportModules( _
             End With
         End If
     Next i
+    Set sh = Nothing
     exportModules = bRet
 End Function
 
@@ -114,10 +116,16 @@ Public Function copySheetsAndModules( _
                                         ) As Boolean
     
     Dim bRet1 As Boolean, bRet2 As Boolean, bRet3 As Boolean
-    Dim copiedSheets As New Collection, copiedStdModules As New Collection, copiedClsModules As New Collection
+    Dim copiedSheets As Collection, copiedStdModules As Collection, copiedClsModules As Collection
+    Set copiedSheets = New Collection
+    Set copiedStdModules = New Collection
+    Set copiedClsModules = New Collection
     bRet1 = copySheets(wbFrom, tgtSheets, wbTo, copiedSheets)
-    bRet2 = copyModules(wbFrom, tgtStdModules, vbext_ct_StdModule, wbTo, copiedStdModules)
-    bRet3 = copyModules(wbFrom, tgtClsModules, vbext_ct_ClassModule, wbTo, copiedClsModules)
+    bRet2 = copyModules(wbFrom, tgtStdModules, 1, wbTo, copiedStdModules) ' 1 = vbext_ct_StdModule
+    bRet3 = copyModules(wbFrom, tgtClsModules, 2, wbTo, copiedClsModules) ' 2 = vbext_ct_ClassModule
+    Set copiedSheets = Nothing
+    Set copiedStdModules = Nothing
+    Set copiedClsModules = Nothing
     
     copySheetsAndModules = bRet1 Or bRet2 Or bRet3
 End Function
@@ -141,8 +149,9 @@ Public Function copyModules(ByVal wbFrom As Workbook, _
                                            ) As Boolean
     Dim tgtMo As String, prg As String
     Dim i As Long
-    Dim sh As New clSheet
     Dim cntLines As Long
+    Dim sh As clSheet
+    Set sh = New clSheet
     
     For i = 1 To UBound(tgtModules) Step 1
         tgtMo = tgtModules(i)
@@ -163,6 +172,8 @@ Public Function copyModules(ByVal wbFrom As Workbook, _
             copiedModules.Add (tgtMo)
         End If
     Next i
+    
+    Set sh = Nothing
 
     If copiedModules.count > 0 Then
         copyModules = True
@@ -199,6 +210,7 @@ Public Function copySheets(ByVal wbFrom As Workbook, _
             copiedSheets.Add (tgtSh)
         End If
     Next i
+    Set sh = Nothing
     
     If copiedSheets.count > 0 Then
         copySheets = True

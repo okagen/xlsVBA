@@ -4,11 +4,12 @@ Option Base 1
 
 '==================================================
 Sub verify_clSheet_convAllCellsOnSheetToValues()
-    Dim sh As New clSheet
+    '事前準備：$verifyシートを作って、セルに適当な値を設定。
+    Dim sh As clSheet
+    Set sh = New clSheet
     Dim bRet As Boolean
     Dim dummyArr(10, 10) As Variant
     Dim i As Integer, j As Integer
-    '=======================
     For i = 1 To 10 Step 1
         For j = 1 To 10 Step 1
             dummyArr(i, j) = "=" & i & "+" & j
@@ -21,9 +22,11 @@ Sub verify_clSheet_convAllCellsOnSheetToValues()
         .Select
         .Range(.Cells(1, 1), .Cells(UBound(dummyArr, 1), UBound(dummyArr, 2))) = dummyArr
     End With
-    '=======================
     
+    '=======================
     bRet = sh.convAllCellsOnSheetToValues(ThisWorkbook, "$verify")
+    '=======================
+    Set sh = Nothing
     
     If bRet = True Then
         Debug.Print "result ::: done " & " |" & Now
@@ -34,11 +37,12 @@ End Sub
 
 '==================================================
 Sub verify_clSheet_getDataAsArray()
-    Dim sh As New clSheet
+    '事前準備：$verify1シートを作って、セルに適当な値を設定。
+    Dim sh As clSheet
+    Set sh = New clSheet
     Dim bRet As Boolean
     Dim dummyArr(10, 10) As Variant
     Dim i As Integer, j As Integer
-    '=======================
     For i = 1 To 10 Step 1
         For j = 1 To 10 Step 1
            dummyArr(i, j) = "dat_" & i & "_" & j
@@ -51,13 +55,14 @@ Sub verify_clSheet_getDataAsArray()
         .Select
         .Range(.Cells(1, 1), .Cells(UBound(dummyArr, 1), UBound(dummyArr, 2))) = dummyArr
     End With
-    '=======================
     
+    '=======================
     Dim dat As Variant
     Dim r As Long, c As Long
     'get data in the sheet
     bRet = sh.getDataAsArray(ThisWorkbook, "$verify1", 1, 5, 1, 7, dat, r, c)
-    
+   '=======================
+     
     If bRet = True Then
         'initialize the sheet to verification
         bRet = sh.initSheet(ThisWorkbook, "$verify2")
@@ -70,21 +75,21 @@ Sub verify_clSheet_getDataAsArray()
     Else
         Debug.Print "result ::: no data" & " |" & Now
     End If
+    
+    Set sh = Nothing
 End Sub
 
 '==================================================
 Sub verify_clSheet_initSheet()
+    '=======================
     Dim name As String
-    Dim sh As New clSheet
+    Dim sh As clSheet
+    Set sh = New clSheet
     Dim bRet As Boolean
-    Dim wb As Workbook
-    
-    '=======================
     name = "SampleSheetForTest"
-    Set wb = ThisWorkbook
+    bRet = sh.initSheet(ThisWorkbook, name)
+    Set sh = Nothing
     '=======================
-    
-    bRet = sh.initSheet(wb, name)
     
     If bRet Then
         Debug.Print "result ::: initSheet done-->" & name & " |" & Now
@@ -96,19 +101,17 @@ End Sub
 
 '==================================================
 Sub verify_clSheet_newSheet()
+    '=======================
     Dim name As String, name1 As String, name2 As String, name3 As String
-    Dim sh As New clSheet
+    Dim sh As clSheet
+    Set sh = New clSheet
     Dim bRet1 As Boolean, bRet2 As Boolean, bRet3 As Boolean
-    Dim wb As Workbook
-    
-    '=======================
     name = "SampleSheetForTest"
-    Set wb = ThisWorkbook
+    bRet1 = sh.newSheet(ThisWorkbook, name, name1)
+    bRet2 = sh.newSheet(ThisWorkbook, name, name2)
+    bRet3 = sh.newSheet(ThisWorkbook, name, name3)
+    Set sh = Nothing
     '=======================
-    
-    bRet1 = sh.newSheet(wb, name, name1)
-    bRet2 = sh.newSheet(wb, name, name2)
-    bRet3 = sh.newSheet(wb, name, name3)
     
     If bRet1 And bRet2 And bRet3 Then
         Debug.Print "result ::: newSheet done-->" & CStr(name1) & " and " & CStr(name2) & " and " & CStr(name3) & " |" & Now
@@ -119,9 +122,47 @@ Sub verify_clSheet_newSheet()
 End Sub
 
 '==================================================
+Sub verify_clSheet_copySheet()
+'***************************************
+    '事前準備：$verifyシートを作って、セルに適当な値を設定。
+    Dim sh As clSheet
+    Set sh = New clSheet
+    Dim bRet As Boolean
+    Dim dummyArr(10, 10) As Variant
+    Dim i As Integer, j As Integer
+    For i = 1 To 10 Step 1
+        For j = 1 To 10 Step 1
+            dummyArr(i, j) = "=" & i & "+" & j
+        Next j
+    Next i
+    'initialize the sheet to verification
+    bRet = sh.initSheet(ThisWorkbook, "$verify")
+    'plot all data on the $verify sheet
+    With ThisWorkbook.sheets("$verify")
+        .Select
+        .Range(.Cells(1, 1), .Cells(UBound(dummyArr, 1), UBound(dummyArr, 2))) = dummyArr
+    End With
+    
+    '=======================
+    Dim nameTgt As String, nameCopy As String, nameActual As String
+    nameTgt = "$verify"
+    bRet = sh.copySheet(ThisWorkbook, nameTgt, nameCopy, nameActual)
+    Set sh = Nothing
+    '=======================
+    
+    If bRet Then
+        Debug.Print "result ::: copySheet done-->" & CStr(nameTgt) & " to " & CStr(nameActual) & Now
+    Else
+        Debug.Print "result ::: err |" & Now
+    End If
+    
+End Sub
+
+'==================================================
 Sub verify_clSheet_existModule()
     Dim moName As String
-    Dim sh As New clSheet
+    Dim sh As clSheet
+    Set sh = New clSheet
     Dim bRet As Boolean
     Dim wb As Workbook
     Set wb = ThisWorkbook
@@ -132,6 +173,7 @@ Sub verify_clSheet_existModule()
     
     'check existance of the module.
     bRet = sh.existModule(wb, moName)
+    Set sh = Nothing
     
     If bRet Then
         Debug.Print "result ::: exist-->" & moName & " |" & Now
@@ -145,7 +187,8 @@ End Sub
 '==================================================
 Sub verify_clSheet_existSheet()
     Dim shName As String
-    Dim sh As New clSheet
+    Dim sh As clSheet
+    Set sh = New clSheet
     Dim bRet As Boolean
     Dim wb As Workbook
     Set wb = ThisWorkbook
@@ -156,6 +199,7 @@ Sub verify_clSheet_existSheet()
     
     'check existance of the sheet
     bRet = sh.existSheet(wb, shName)
+    Set sh = Nothing
     
     If bRet Then
         Debug.Print "result ::: exist-->" & shName & " |" & Now
@@ -168,7 +212,8 @@ End Sub
 '==================================================
 Sub verify_clSheet_existSheetWithWildCardCharacter()
     Dim shName As String
-    Dim sh As New clSheet
+    Dim sh As clSheet
+    Set sh = New clSheet
     Dim bRet As Boolean
     Dim wb As Workbook
     Set wb = ThisWorkbook
@@ -180,6 +225,7 @@ Sub verify_clSheet_existSheetWithWildCardCharacter()
     'check existance of the sheet
     Dim shNames As New Collection
     bRet = sh.existSheetWithWildCardCharacter(wb, shName, shNames)
+    Set sh = Nothing
     
     If bRet Then
         Debug.Print "result ::: exist-->" & shNames.count & " sheets as " & shName & " |" & Now

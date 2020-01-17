@@ -5,16 +5,20 @@ Option Base 1
 '==================================================
 Sub verify_clDatArr_cnvCollToArr()
 
-    Dim coll As New Collection
     Dim i As Long
     Dim arrR As Variant
     Dim arrC As Variant
-    Dim da As New clArr
     Dim bRet As Boolean
     Dim wb As Workbook
-    Dim sh As New clSheet
     Dim isR_Y As Boolean
     Dim isR_N As Boolean
+    Dim coll As New Collection
+    Dim da As New clArr
+    Dim sh As New clSheet
+    
+    Set coll = New Collection
+    Set da = New clArr
+    Set sh = New clSheet
     
     '=======================
     For i = 1 To 10 Step 1
@@ -41,6 +45,10 @@ Sub verify_clDatArr_cnvCollToArr()
     Else
         Debug.Print "result ::: no data" & " |" & Now
     End If
+    
+    Set coll = Nothing
+    Set da = Nothing
+    Set sh = Nothing
 End Sub
 
 

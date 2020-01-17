@@ -13,13 +13,15 @@ Sub verify_clSheet_hideAndShowSheetsWithPrefix()
     bRet = verify_clFiles_makeDummyExcelFileWithDummySheets(dummySheets, dummyWb)
     
     '=======================
-    Dim shs As New clSheets
+    Dim shs As clSheets
+    Set shs = New clSheets
     bRet = shs.hideSheetsWithPrefix(dummyWb, "$", "$$")
     bRet = shs.hideSheetsWithPrefix(dummyWb, "$$", "")
     '=======================
     '=======================
     bRet = shs.showSheetsWithPrefix(dummyWb, "$", "$$")
     bRet = shs.showSheetsWithPrefix(dummyWb, "$")
+    Set shs = Nothing
     '=======================
     
     If bRet = True Then
@@ -33,8 +35,6 @@ End Sub
 '==================================================
 Sub verify_clSheet_convAllCellsOnSheetsToValues()
     '事前準備：ダミーのシートを持つ、ダミーのファイルを作成。
-    Dim sh As New clSheet
-    Dim shs As New clSheets
     Dim bRet As Boolean
     Dim dummyArr(10, 10) As Variant
     Dim i As Integer, j As Integer
@@ -43,6 +43,8 @@ Sub verify_clSheet_convAllCellsOnSheetsToValues()
             dummyArr(i, j) = "=" & i & "+" & j
         Next j
     Next i
+    Dim sh As clSheet
+    Set sh = New clSheet
     'initialize the sheet to verification
     bRet = sh.initSheet(ThisWorkbook, "$verify1")
     bRet = sh.initSheet(ThisWorkbook, "$verify2")
@@ -55,11 +57,15 @@ Sub verify_clSheet_convAllCellsOnSheetsToValues()
         .Select
         .Range(.Cells(1, 1), .Cells(UBound(dummyArr, 1), UBound(dummyArr, 2))) = dummyArr
     End With
+    Set sh = Nothing
     
     '=======================
     Dim sheets As Variant
+    Dim shs As clSheets
+    Set shs = New clSheets
     sheets = Array("$verify1")
     bRet = shs.convAllCellsOnSheetsToValues(ThisWorkbook, sheets)
+    Set shs = Nothing
     '=======================
     
     If bRet = True Then

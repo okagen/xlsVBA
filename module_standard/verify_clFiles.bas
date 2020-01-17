@@ -11,7 +11,8 @@ Sub verify_clFiles_exportModules()
     Dim toPath As String
     Dim wb As Workbook
     Set wb = ThisWorkbook
-    Dim fl As New clFiles
+    Dim fl As clFiles
+    Set fl = New clFiles
     
     'export class modules.
     '=======================
@@ -28,6 +29,8 @@ Sub verify_clFiles_exportModules()
     '=======================
     bRet = fl.exportModules(wb, tgtModules, toPath)
     Debug.Print "result ::: verify_clFiles_exportModules done -->" & CStr(bRet) & " |" & Now
+    
+    Set fl = Nothing
 
 End Sub
 
@@ -41,11 +44,13 @@ Sub verify_clFiles_getAllXlsFilePathCol()
     dummySheets = Array("$verify")
     bRet = verify_clFiles_makeDummyExcelFileWithDummySheets(dummySheets, dummyWb)
     
-    Dim dat As New Collection
-    Dim FLS As New clFiles
+    Dim dat As Collection
+    Dim fls As clFiles
+    Set dat = New Collection
+    Set fls = New clFiles
     Dim i As Long
     
-    bRet = FLS.getAllXlsFilePathCol(ThisWorkbook.Path, dat)
+    bRet = fls.getAllXlsFilePathCol(ThisWorkbook.Path, dat)
     
     If bRet = True Then
         'plot all data on the $verify sheet
@@ -60,6 +65,10 @@ Sub verify_clFiles_getAllXlsFilePathCol()
     Else
         Debug.Print "result ::: no data" & " |" & Now
     End If
+    
+    Set dat = Nothing
+    Set fls = Nothing
+    
 End Sub
 
 '==================================================
@@ -72,7 +81,8 @@ Sub verify_clFiles_copySheetsAndModules()
     Dim toPath As String, fileName As String
     Dim wb As Workbook, wbNew As Workbook
     Set wb = ThisWorkbook
-    Dim fl As New clFiles
+    Dim fl As clFiles
+    Set fl = New clFiles
     
     'ダミーのシートを持つ、ダミー①のファイルを作成。
     Dim dummySheets1 As Variant
@@ -103,8 +113,12 @@ Sub verify_clFiles_copySheetsAndModules()
     bRet = fl.copySheetsAndModules(ThisWorkbook, dummyWb2, tgtSheets, tgtStdModules, tgtClsModules)
     Debug.Print "result ::: verify_clFiles_copySheetsAndModulesIntoNewFileThenSave done -->" & CStr(bRet) & " |" & Now
     '=======================
-    Dim sh As New clSheet
-    bRet = sh.convAllCellsIntoValue(dummyWb2, tgtSheets(1))
+    
+    Set fl = Nothing
+
+
+'    Dim sh As New clSheet
+    'bRet = sh.convAllCellsOnSheetToValues(dummyWb2, tgtSheets(1))
     
 '    'Save the new book as ...
 '    Dim objFso As Object
@@ -130,12 +144,13 @@ Public Function verify_clFiles_makeDummyExcelFileWithDummySheets(ByVal sheets As
     Workbooks.Add
     Set dummyWb = Application.ActiveWorkbook
     
-    Dim sh As New clSheet
+    Dim sh As clSheet
+    Set sh = New clSheet
     Dim i As Long
     Dim bRet As Boolean
     For i = 1 To UBound(sheets) Step 1
         bRet = sh.initSheet(dummyWb, sheets(i))
     Next i
-    
+    Set sh = Nothing
     verify_clFiles_makeDummyExcelFileWithDummySheets = True
 End Function
