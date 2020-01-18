@@ -30,6 +30,8 @@
 
 1. Create several sheets by specifying their names.If a sheet with the same name exists, add (#) to the end of the sheet name and count up the number. / 名前を指定してSheetを作成。 同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。`newSheet`
 
+1. Copy the specified sheet with a new name. If a sheet with the same name exists, add (#) to the end of the sheet name and count up the number. / 既存Sheetを、指定した名前のシートにコピー。同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。`copySheet`
+
 1. Check Module existence by specifying the name. / 名前を指定してModuleの有無をチェック。`existModule`
 
 1. Check Module existence by specifying the name. / 名前を指定してSheetの有無をチェック。`existSheet`
