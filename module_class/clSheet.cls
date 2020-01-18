@@ -101,39 +101,35 @@ End Function
 ' If a sheet with the same name exists, add (#) to the end of the sheet name and count up the number.
 ' 名前を指定してSheetを新規作成。 同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
 '  [i]wb        対象のWorkbook
-'  [i]shName    作成するシート名
-'  [o]newSheet  作成された新しいシートの名前
+'  [i]newName  作成予定の新しいシートの名前
+'  [o]actualName  作成された新しいシートの名前
 '--------------------------------------------------
 Public Function newSheet(ByVal wb As Workbook, _
-                                        ByVal shName As String, _
-                                        ByRef newSheetName As String _
+                                        ByVal newName As String, _
+                                        ByRef actualName As String _
                                         ) As Boolean
     Dim num As Integer
     Dim flg As Boolean
-    Dim newName As String
-    
-    newName = shName
     num = 1
     flg = True
+    actualName = newName
     Do While flg
-        If Not existSheet(wb, newName) Then
+        If Not existSheet(wb, actualName) Then
             flg = False
         Else
-            newName = shName & " " & Format(num, "(#)")
+            actualName = newName & " " & Format(num, "(#)")
             num = num + 1
         End If
     Loop
-    
     wb.Worksheets.Add After:=wb.Worksheets(Worksheets.count)
-    ActiveSheet.name = newName
-    newSheetName = newName
+    ActiveSheet.name = actualName
     newSheet = True
-    
 End Function
 
 
 '==================================================
-'
+' Copy the specified sheet with a new name.
+' If a sheet with the same name exists, add (#) to the end of the sheet name and count up the number.
 ' 既存Sheetを、指定した名前のシートにコピー。同名のシートが存在した場合、シート名末尾に(#)を付けてカウントアップ。
 '  [i]wb        対象のWorkbook
 '  [i]tgtName    コピー元のシート名
@@ -142,29 +138,24 @@ End Function
 '--------------------------------------------------
 Public Function copySheet(ByVal wb As Workbook, _
                                         ByVal tgtName As String, _
-                                        ByVal shName As String, _
-                                        ByRef newSheetName As String _
+                                        ByVal newName As String, _
+                                        ByRef actualName As String _
                                         ) As Boolean
-
     Dim num As Integer
     Dim flg As Boolean
-    Dim newName As String
-    
-    newName = shName
     num = 1
     flg = True
+    actualName = newName
     Do While flg
-        If Not existSheet(wb, newName) Then
+        If Not existSheet(wb, actualName) Then
             flg = False
         Else
-            newName = shName & " " & Format(num, "(#)")
+            actualName = newName & " " & Format(num, "(#)")
             num = num + 1
         End If
     Loop
-    
     wb.sheets(tgtName).Copy After:=wb.Worksheets(Worksheets.count)
-    ActiveSheet.name = newName
-    newSheetName = newName
+    ActiveSheet.name = actualName
     copySheet = True
 End Function
 

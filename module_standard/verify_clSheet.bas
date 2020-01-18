@@ -101,15 +101,22 @@ End Sub
 
 '==================================================
 Sub verify_clSheet_newSheet()
+    '事前準備：'ダミーファイルを作成。
+    Dim dummySheets As Variant
+    Dim dummyWb As Workbook
+    Dim bRet As Boolean
+    dummySheets = Array()
+    bRet = verify_clFiles_makeDummyExcelFileWithDummySheets(dummySheets, dummyWb)
+    
     '=======================
     Dim name As String, name1 As String, name2 As String, name3 As String
     Dim sh As clSheet
     Set sh = New clSheet
     Dim bRet1 As Boolean, bRet2 As Boolean, bRet3 As Boolean
     name = "SampleSheetForTest"
-    bRet1 = sh.newSheet(ThisWorkbook, name, name1)
-    bRet2 = sh.newSheet(ThisWorkbook, name, name2)
-    bRet3 = sh.newSheet(ThisWorkbook, name, name3)
+    bRet1 = sh.newSheet(dummyWb, name, name1)
+    bRet2 = sh.newSheet(dummyWb, name, name2)
+    bRet3 = sh.newSheet(dummyWb, name, name3)
     Set sh = Nothing
     '=======================
     
@@ -121,42 +128,43 @@ Sub verify_clSheet_newSheet()
     
 End Sub
 
+
 '==================================================
 Sub verify_clSheet_copySheet()
-'***************************************
-    '事前準備：$verifyシートを作って、セルに適当な値を設定。
-    Dim sh As clSheet
-    Set sh = New clSheet
+    '事前準備：'コピー元のシートを持つ、ダミーファイルを作成。
+    Dim dummySheets As Variant
+    Dim dummyWb As Workbook
     Dim bRet As Boolean
     Dim dummyArr(10, 10) As Variant
     Dim i As Integer, j As Integer
+    dummySheets = Array("ToBeCopied")
+    bRet = verify_clFiles_makeDummyExcelFileWithDummySheets(dummySheets, dummyWb)
     For i = 1 To 10 Step 1
         For j = 1 To 10 Step 1
-            dummyArr(i, j) = "=" & i & "+" & j
+           dummyArr(i, j) = "dat_" & i & "_" & j
         Next j
     Next i
-    'initialize the sheet to verification
-    bRet = sh.initSheet(ThisWorkbook, "$verify")
-    'plot all data on the $verify sheet
-    With ThisWorkbook.sheets("$verify")
+    With dummyWb.sheets("ToBeCopied")
         .Select
         .Range(.Cells(1, 1), .Cells(UBound(dummyArr, 1), UBound(dummyArr, 2))) = dummyArr
     End With
     
     '=======================
-    Dim nameTgt As String, nameCopy As String, nameActual As String
-    nameTgt = "$verify"
-    bRet = sh.copySheet(ThisWorkbook, nameTgt, nameCopy, nameActual)
+    Dim actualName1 As String, actualName2 As String
+    Dim sh As clSheet
+    Set sh = New clSheet
+    bRet = sh.copySheet(dummyWb, "ToBeCopied", "ToBeCopied", actualName1)
+    bRet = sh.copySheet(dummyWb, "ToBeCopied", "ToBeCopied", actualName2)
     Set sh = Nothing
     '=======================
     
     If bRet Then
-        Debug.Print "result ::: copySheet done-->" & CStr(nameTgt) & " to " & CStr(nameActual) & Now
+        Debug.Print "result ::: copySheet done-->ToBeCopied to " & CStr(actualName1) & " and " & CStr(actualName2) & Now
     Else
         Debug.Print "result ::: err |" & Now
     End If
-    
 End Sub
+
 
 '==================================================
 Sub verify_clSheet_existModule()
