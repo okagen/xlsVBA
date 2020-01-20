@@ -52,7 +52,6 @@ Public Function showSheetsWithPrefix(ByVal wb As Workbook, _
     showSheetsWithPrefix = True
 End Function
 
-
 '==================================================
 ' Convert all cells on some worksheets to values.
 ' 指定した複数シートの全てのセルを「値」に変換

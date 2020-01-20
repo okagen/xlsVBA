@@ -138,6 +138,37 @@ Sub verify_clFiles_copySheetsAndModules()
 End Sub
 
 
+
+'==================================================
+Sub verify_clFiles_copySheetsWithPrefix()
+    '事前準備：$verifyシートを作って、セルに適当な値を設定。
+    Dim bRet As Boolean
+    
+    'ダミーのシートを持つ、ダミー①のファイルを作成。
+    Dim dummySheets1 As Variant
+    Dim dummyWb1 As Workbook
+    dummySheets1 = Array("$dummy1", "$dummy2", "$$dummy3", "$$dummy4", "$dummy5")
+    bRet = verify_clFiles_makeDummyExcelFileWithDummySheets(dummySheets1, dummyWb1)
+    
+    'ダミーのシートを持つ、ダミー②のファイルを作成。
+    Dim dummySheets2 As Variant
+    Dim dummyWb2 As Workbook
+    dummySheets2 = Array("test1", "test2", "test3")
+    bRet = verify_clFiles_makeDummyExcelFileWithDummySheets(dummySheets2, dummyWb2)
+    
+    'ダミー①から、ダミー②へ、シートをいくつかコピー
+    '=======================
+    Dim fl As clFiles
+    Set fl = New clFiles
+    Dim copiedSheets As Collection
+    Set copiedSheets = New Collection
+    bRet = fl.copySheetsWithPrefix(dummyWb1, "$$", dummyWb2, copiedSheets)
+    Set fl = Nothing
+    Set copiedSheets = Nothing
+    Debug.Print "result ::: verify_clFiles_copySheetsWithPrefix done -->" & CStr(bRet) & " |" & Now
+    '=======================
+End Sub
+
 '==================================================
 Public Function verify_clFiles_makeDummyExcelFileWithDummySheets(ByVal sheets As Variant, _
                                                                                         ByRef dummyWb As Workbook) As Boolean

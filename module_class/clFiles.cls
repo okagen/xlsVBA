@@ -219,6 +219,36 @@ Public Function copySheets(ByVal wbFrom As Workbook, _
     End If
 End Function
 
+'=============================
+' Copy some sheets with specified prefix characters from one book into another book.
+' ブック内の指定された接頭文字を持つシートを、別のブックの中にコピーする。
+'  [i]wbFrom                コピー元のExcelブックオブジェクト
+'  [i]pfx                       コピー対象のシート名の接頭文字
+'  [i]wbTo                   コピー先のExcelブックオブジェクト
+'  [o]copiedSheets      コピーが成功したシートの名前群
+' Return : True : one or more were successfully copied
+' 関数の返り値：一つ以上コピーに成功したらTrue
+'--------------------------------------------------
+Public Function copySheetsWithPrefix(ByVal wbFrom As Workbook, _
+                                                        ByVal pfx As String, _
+                                                        ByVal wbTo As Workbook, _
+                                                        ByRef copiedSheets As Collection _
+                                                        ) As Boolean
+    Dim res As Variant
+    Dim wsh As Worksheet
+    For Each wsh In wbFrom.sheets
+        If pfx = Left(wsh.name, Len(pfx)) Then
+            wsh.Copy After:=wbTo.sheets(wbTo.sheets.count)
+            copiedSheets.Add (wsh.name)
+        End If
+    Next wsh
+    If copiedSheets.count > 0 Then
+        copySheetsWithPrefix = True
+    Else
+        copySheetsWithPrefix = False
+    End If
+End Function
+
 
 '----------------------------------------------------------------------------------
 '↓↓↓↓ 見直し中
