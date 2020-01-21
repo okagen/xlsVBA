@@ -12,10 +12,10 @@ Option Base 1
 
 '==================================================
 ' Hide the sheets with the specified prefix character.
-' 指定した接頭文字を持つシートを非表示にする。
+' 指定した接頭辞を持つシートを非表示にする。
 '  [i]wb            対象のWorkbook
-'  [i]pfx           非表示にするシートの接頭文字
-'  [i]pfxIgnore  非表示にしないシートの接頭文字
+'  [i]pfx           非表示にするシートの接頭辞
+'  [i]pfxIgnore  非表示にしないシートの接頭辞
 '--------------------------------------------------
 Public Function hideSheetsWithPrefix(ByVal wb As Workbook, _
                                                         ByVal pfx As String, _
@@ -33,10 +33,10 @@ End Function
 
 '==================================================
 ' Show the sheets with the specified prefix character.
-' 指定した接頭文字を持つシートを表示する。
+' 指定した接頭辞を持つシートを表示する。
 '  [i]wb            対象のWorkbook
-'  [i]pfx           表示するシートの接頭文字
-'  [i]pfxIgnore  表示しないシートの接頭文字
+'  [i]pfx           表示するシートの接頭辞
+'  [i]pfxIgnore  表示しないシートの接頭辞
 '--------------------------------------------------
 Public Function showSheetsWithPrefix(ByVal wb As Workbook, _
                                                         ByVal pfx As String, _

@@ -711,7 +711,7 @@ End Function
 '一致するものが有ればprefixを付けてファイル名を変更する。
 '  [i]wb                対象のWorkbook
 '  [i]tgtShName         対象とするシート名 ワイルドカード可
-'  [i]prefix            接頭字(例えば　back_)
+'  [i]prefix            接頭辞(例えば　back_)
 '  [o]changedShNames    変更後のシート名群
 '  changeSheetNameは変更したシートがあれば True、無ければFalseを返す。
 '--------------------------------------------------

@@ -221,9 +221,9 @@ End Function
 
 '=============================
 ' Copy some sheets with specified prefix characters from one book into another book.
-' ブック内の指定された接頭文字を持つシートを、別のブックの中にコピーする。
+' ブック内の指定された接頭辞を持つシートを、別のブックの中にコピーする。
 '  [i]wbFrom                コピー元のExcelブックオブジェクト
-'  [i]pfx                       コピー対象のシート名の接頭文字
+'  [i]pfx                       コピー対象のシート名の接頭辞
 '  [i]wbTo                   コピー先のExcelブックオブジェクト
 '  [o]copiedSheets      コピーが成功したシートの名前群
 ' Return : True : one or more were successfully copied
