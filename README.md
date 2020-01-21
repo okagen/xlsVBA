@@ -19,6 +19,8 @@
 
 1. Copy some specified sheets from one excel book into another. / Excelファイル内の指定されたシートを別のExcelファイルコピーする。`copySheets`
 
+1. Copy some sheets with specified prefix characters from one book into another book. / ブック内の指定された接頭文字を持つシートを、別のブックの中にコピーする。`copySheetsWithPrefix`
+
 シート処理クラス : clSheet.cls
 =========
 
