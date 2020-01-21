@@ -2,6 +2,27 @@ Attribute VB_Name = "verify_clSheets"
 Option Explicit
 Option Base 1
 
+'==================================================
+Sub verify_clSheet_hideWithPrefix()
+    '=======================
+    Dim bRet As Boolean
+    Dim shs As clSheets
+    Set shs = New clSheets
+    bRet = shs.hideSheetsWithPrefix(ThisWorkbook, "$$", "")
+    Set shs = Nothing
+    '=======================
+End Sub
+
+'==================================================
+Sub verify_clSheet_showWithPrefix()
+    '=======================
+    Dim bRet As Boolean
+    Dim shs As clSheets
+    Set shs = New clSheets
+    bRet = shs.showSheetsWithPrefix(ThisWorkbook, "$", "")
+    Set shs = Nothing
+    '=======================
+End Sub
 
 '==================================================
 Sub verify_clSheet_hideAndShowSheetsWithPrefix()
